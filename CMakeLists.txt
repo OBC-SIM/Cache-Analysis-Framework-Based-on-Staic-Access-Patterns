@@ -7,6 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ── 의존성 ────────────────────────────────────────────────────
 find_package(yaml-cpp REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 find_package(GTest REQUIRED)
 include(GoogleTest)
@@ -28,7 +29,7 @@ file(GLOB_RECURSE APEX_LIB_SOURCES
 if(APEX_LIB_SOURCES)
     add_library(apex_lib STATIC ${APEX_LIB_SOURCES})
     target_include_directories(apex_lib PUBLIC ${APEX_INCLUDE_DIRS})
-    target_link_libraries(apex_lib PUBLIC yaml-cpp)
+    target_link_libraries(apex_lib PUBLIC yaml-cpp nlohmann_json::nlohmann_json)
 endif()
 
 # ── 실행 파일 ────────────────────────────────────────────────
@@ -37,7 +38,7 @@ target_include_directories(apex-cache PRIVATE ${APEX_INCLUDE_DIRS})
 if(TARGET apex_lib)
     target_link_libraries(apex-cache PRIVATE apex_lib)
 endif()
-target_link_libraries(apex-cache PRIVATE yaml-cpp)
+target_link_libraries(apex-cache PRIVATE yaml-cpp nlohmann_json::nlohmann_json)
 
 # ── 테스트 ───────────────────────────────────────────────────
 enable_testing()
@@ -48,7 +49,7 @@ function(apex_add_test target source)
     if(TARGET apex_lib)
         target_link_libraries(${target} PRIVATE apex_lib)
     endif()
-    target_link_libraries(${target} PRIVATE yaml-cpp GTest::GTest GTest::Main)
+    target_link_libraries(${target} PRIVATE yaml-cpp nlohmann_json::nlohmann_json GTest::GTest GTest::Main)
     gtest_discover_tests(${target})
 endfunction()
 
