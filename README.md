@@ -27,6 +27,39 @@ C/C++ 소스 코드
 
 ---
 
+## 메모리 모델 — Miss Upper-Bound
+
+정적 도구는 실제 실행 주소를 알 수 없다. 별도로 할당된 객체(배열·구조체)들의
+상호 주소 관계는 컴파일러의 섹션 배정·재배열, allocator 동작, ASLR에 따라
+빌드/실행마다 달라지므로 소스나 IR만으로는 **불가지(不可知)**하다.
+
+APEX-Cache는 이 불확정성을 **보수적 상한(upper bound)** 방향으로 고정한다.
+
+- **객체 base를 캐시 라인 크기로 정렬한다.** 이는 "서로 다른 객체는 같은 캐시
+  라인을 공유하지 않는다"고 가정하는 것이다. 두 객체가 실제로 인접 배치되어
+  한 라인을 공유했다면 두 번째 접근이 hit이 됐겠지만, 링커가 떼어놓았다면
+  miss다. 후자를 가정하면 **miss를 과소계상하지 않는** 안전한 상한이 된다.
+- 따라서 보고되는 miss 수는 실제 실행의 **상한**이며, 실제 프로그램은
+  이보다 적거나 같은 miss를 낸다.
+
+### 모델이 정확한 영역과 가정인 영역
+
+| 단위 | 배치 | 근거 |
+|------|------|------|
+| 배열 **내부** 원소 | `base + i*elem_size` 연속 | 언어가 보장 (정확) |
+| 구조체 **내부** 멤버 | `base + member_offset` 연속 | 언어가 보장 (정확) |
+| 별도 객체 **사이** | 각 base를 라인 정렬 | 불가지 → 보수적 상한 (가정) |
+
+### 전제 조건
+
+상한 성질은 **객체 정렬 단위 = 캐시 `line_size`** 일 때 성립한다. 정렬이
+line_size보다 작으면 두 객체가 한 라인을 공유할 수 있어 상한이 깨진다.
+실제 파이프라인은 `cache.yaml`의 `line_size`를 `MemoryLayout`에 주입하여
+이 조건을 보장한다. (`MemoryLayout`의 기본 정렬 32는 인자 미지정 시의
+fallback이며, 정식 실행 경로에서는 항상 line_size가 주입된다.)
+
+---
+
 ## 기능
 
 - AP JSON → AccessEvent 선형 스트림 복원 (루프 언롤, 함수 call expansion)
@@ -185,7 +218,7 @@ Rank  Loop    Access       Miss%  Share  Miss Type   Hint
 | 3 | Memory Layer (MemoryLayout, AddressMapper) | ✅ 완료 |
 | 4 | Cache Layer (YamlConfigParser, LRU 시뮬레이션) | ✅ 완료 |
 | 5 | Analysis Layer (Attribution, MissClassifier, Diagnostics) | ✅ 완료 |
-| 6 | Report Layer (CSV / JSON / Markdown) | ⬜ 예정 |
+ | 6 | Report Layer (CSV / JSON / Markdown) | ✅ 완료 |
 | 7 | CLI + 통합 테스트 | ⬜ 예정 |
 | 8 | Python 후처리 scripts | ⬜ 예정 |
 
