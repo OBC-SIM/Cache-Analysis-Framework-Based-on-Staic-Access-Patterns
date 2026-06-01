@@ -24,6 +24,7 @@ file(GLOB_RECURSE APEX_LIB_SOURCES
     src/cache/*.cpp
     src/analysis/*.cpp
     src/report/*.cpp
+    src/pipeline/*.cpp
 )
 
 if(APEX_LIB_SOURCES)
