@@ -184,7 +184,7 @@ Rank  Loop    Access       Miss%  Share  Miss Type   Hint
 | 2 | AP Layer (ApLoader, EventBuilder) | ✅ 완료 |
 | 3 | Memory Layer (MemoryLayout, AddressMapper) | ✅ 완료 |
 | 4 | Cache Layer (YamlConfigParser, LRU 시뮬레이션) | ✅ 완료 |
-| 5 | Analysis Layer (Attribution, MissClassifier, Diagnostics) | ⬜ 예정 |
+| 5 | Analysis Layer (Attribution, MissClassifier, Diagnostics) | ✅ 완료 |
 | 6 | Report Layer (CSV / JSON / Markdown) | ⬜ 예정 |
 | 7 | CLI + 통합 테스트 | ⬜ 예정 |
 | 8 | Python 후처리 scripts | ⬜ 예정 |
