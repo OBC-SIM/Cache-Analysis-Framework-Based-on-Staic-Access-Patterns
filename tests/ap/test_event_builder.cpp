@@ -107,6 +107,55 @@ TEST(EventBuilder, nested_loop_MxN_produces_MxN_events) {
     ASSERT_EQ(events.size(), 12u);  // 3 * 4
 }
 
+// ── call expansion ────────────────────────────────────────────
+
+TEST(EventBuilder, call_expansion_inlines_callee_events) {
+    // callee "foo": ScalarNode x
+    auto callee_node  = std::make_unique<ScalarNode>();
+    callee_node->name = "x";
+    callee_node->op   = "load";
+
+    std::vector<std::unique_ptr<ApNode>> callee_body;
+    callee_body.push_back(std::move(callee_node));
+
+    // caller: CallStmt → "foo"
+    auto call_node    = std::make_unique<CallNode>();
+    call_node->callee = "foo";
+
+    std::vector<std::unique_ptr<ApNode>> caller_nodes;
+    caller_nodes.push_back(std::move(call_node));
+
+    EventBuilder builder;
+    builder.register_function("foo", std::move(callee_body));
+    auto events = builder.build(std::move(caller_nodes));
+
+    ASSERT_EQ(events.size(), 1u);
+    EXPECT_EQ(events[0].object_name, "x");
+    EXPECT_EQ(events[0].op,          "load");
+}
+
+TEST(EventBuilder, call_expansion_region_path_includes_call_site) {
+    auto callee_node  = std::make_unique<ScalarNode>();
+    callee_node->name = "y";
+    callee_node->op   = "store";
+
+    std::vector<std::unique_ptr<ApNode>> callee_body;
+    callee_body.push_back(std::move(callee_node));
+
+    auto call_node    = std::make_unique<CallNode>();
+    call_node->callee = "bar";
+
+    std::vector<std::unique_ptr<ApNode>> caller_nodes;
+    caller_nodes.push_back(std::move(call_node));
+
+    EventBuilder builder;
+    builder.register_function("bar", std::move(callee_body));
+    auto events = builder.build(std::move(caller_nodes));
+
+    ASSERT_EQ(events.size(), 1u);
+    EXPECT_EQ(events[0].region_path, "bar");
+}
+
 TEST(EventBuilder, loop_stack_records_active_iterations) {
     auto acc       = std::make_unique<ArrayNode>();
     acc->name      = "A";
