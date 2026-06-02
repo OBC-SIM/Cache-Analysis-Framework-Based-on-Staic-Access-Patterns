@@ -2,3 +2,5 @@ system-prompt-extraction/
 build/
 results/
 compile_commands.json
+.cache/
+*.idx
