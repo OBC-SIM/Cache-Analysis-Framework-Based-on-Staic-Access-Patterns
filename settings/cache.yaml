@@ -1,0 +1,32 @@
+cores:
+  count: 1
+  mapping:
+    - id: 0
+      l1: L1D0
+
+caches:
+  - name: L1D0
+    role: L1
+    private_to: 0
+    size_bytes: 32768
+    line_size: 64
+    associativity: 8
+    replacement: LRU
+    write_policy: write-back
+    write_allocate: true
+    delay_cycles: 4
+    next: L2
+  - name: L2
+    role: LLC
+    size_bytes: 262144
+    line_size: 64
+    associativity: 8
+    replacement: LRU
+    write_policy: write-back
+    write_allocate: true
+    delay_cycles: 12
+    next: Memory
+
+memory:
+  name: Memory
+  delay_cycles: 120
