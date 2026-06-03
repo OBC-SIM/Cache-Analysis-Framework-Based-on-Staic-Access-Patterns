@@ -52,32 +52,25 @@ using RawAccessStep = std::variant<RawIndexStep, FieldStep>;
  */
 struct ScalarNode : ApNode
 {
-  std::string name;
+  std::string object;  ///< metadata.objects의 object id
   std::string op;
-
-  std::string object;  ///< LAT v2: metadata.objects의 object id
 
   ApNodeKind kind() const override { return ApNodeKind::Scalar; }
 };
 
 /**
- * @brief 배열 접근 노드.
+ * @brief 배열/구조체 접근 노드.
  *
- * shape가 비어 있으면 ApLoader가 shapes.yaml에서 보완한다.
+ * shape/elem_size는 object id로 metadata.objects/structs에서 해석한다.
+ * access_path가 인덱스·필드 스텝을 순서대로 담는다.
  *
  * @pre op은 "load" 또는 "store"
- * @pre indices의 각 원소는 루프 유도 변수 이름
  */
 struct ArrayNode : ApNode
 {
-  std::string name;
-  std::vector<std::string> indices;
-  std::vector<int64_t> shape;
-  int64_t elem_size = 4;
+  std::string object;  ///< metadata.objects의 object id
+  std::vector<RawAccessStep> access_path;
   std::string op;
-
-  std::string object;                      ///< LAT v2: metadata.objects의 object id
-  std::vector<RawAccessStep> access_path;  ///< LAT v2
 
   ApNodeKind kind() const override { return ApNodeKind::Array; }
 };
