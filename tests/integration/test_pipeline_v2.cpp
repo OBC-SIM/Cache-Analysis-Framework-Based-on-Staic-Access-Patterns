@@ -27,6 +27,7 @@ HierarchyConfig make_config(uint64_t l1_bytes, int line_size, int assoc)
   l1.associativity = assoc;
   l1.write_policy = WritePolicy::WriteBack;
   l1.write_allocate = true;
+  l1.delay_cycles = 4;
   l1.next = "L2";
 
   CacheConfig l2;
@@ -37,6 +38,7 @@ HierarchyConfig make_config(uint64_t l1_bytes, int line_size, int assoc)
   l2.line_size = line_size;
   l2.associativity = 8;
   l2.write_policy = WritePolicy::WriteBack;
+  l2.delay_cycles = 12;
   l2.next = "Memory";
 
   cfg.caches = {l1, l2};
@@ -142,6 +144,30 @@ TEST(PipelineV2, sequential_1d_one_miss_per_line)
   EXPECT_EQ(total_misses(r.stats), 8u);
 }
 
+TEST(PipelineV2, sequential_1d_reports_total_accesses)
+{
+  auto r = run(kSeq1d, make_config(32768, 32, 8));
+  EXPECT_EQ(r.cache_stats.total_accesses, 64u);
+  EXPECT_EQ(r.cache_stats.load_accesses, 64u);
+  EXPECT_EQ(r.cache_stats.store_accesses, 0u);
+}
+
+TEST(PipelineV2, sequential_1d_reports_l1_hits_and_misses)
+{
+  auto r = run(kSeq1d, make_config(32768, 32, 8));
+  EXPECT_EQ(r.cache_stats.l1_misses, 8u);
+  EXPECT_EQ(r.cache_stats.l1_hits, 56u);
+}
+
+TEST(PipelineV2, sequential_1d_accumulates_cycles)
+{
+  auto r = run(kSeq1d, make_config(32768, 32, 8));
+  const uint64_t expected = 8u * 46u + 56u * 4u;
+  EXPECT_EQ(r.cache_stats.total_cycles, expected);
+  EXPECT_DOUBLE_EQ(r.cache_stats.average_cycles_per_access(),
+                   static_cast<double>(expected) / 64.0);
+}
+
 TEST(PipelineV2, local_2d_kernel_cold_miss_count)
 {
   auto r = run(kLocal2d, make_config(1u << 20, 64, 8));
@@ -162,11 +188,26 @@ TEST(PipelineV2, per_object_miss_attribution)
   EXPECT_EQ(r.stats.by_object["fn::B"], 256u);
 }
 
+TEST(PipelineV2, per_object_access_stats_include_hits)
+{
+  auto r = run(kLocal2d, make_config(1u << 20, 64, 8));
+  const auto & a = r.cache_stats.objects.at("fn::A");
+  const auto & b = r.cache_stats.objects.at("fn::B");
+
+  EXPECT_EQ(a.accesses, 4096u);
+  EXPECT_EQ(a.misses, 256u);
+  EXPECT_EQ(a.hits, 3840u);
+  EXPECT_EQ(b.accesses, 4096u);
+  EXPECT_EQ(b.misses, 256u);
+  EXPECT_EQ(b.hits, 3840u);
+}
+
 TEST(PipelineV2, stride_equal_to_line_misses_every_access)
 {
   auto r = run(kStride, make_config(32768, 32, 8));
   EXPECT_EQ(r.stats.cold, 32u);            // 32회 접근 모두 새 라인
   EXPECT_EQ(total_misses(r.stats), 32u);
+  EXPECT_EQ(r.cache_stats.l1_misses, r.cache_stats.total_accesses);
 }
 
 TEST(PipelineV2, alternating_same_set_access_is_conflict_miss)

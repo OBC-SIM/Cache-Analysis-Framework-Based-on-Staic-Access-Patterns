@@ -3,6 +3,7 @@
 
 #include "analysis/Attribution.hpp"
 #include "analysis/Diagnostics.hpp"  // MissStats
+#include "analysis/SimulationStats.hpp"
 #include "ap/AccessEvent.hpp"
 #include "ap/ApProgram.hpp"
 #include "cache/CacheConfig.hpp"
@@ -19,6 +20,7 @@ namespace apex
 struct PipelineResult
 {
   MissStats stats;
+  SimulationStats cache_stats;
   Attribution attribution;
 };
 

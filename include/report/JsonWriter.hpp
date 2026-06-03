@@ -2,6 +2,7 @@
 #include <iosfwd>
 
 #include "analysis/Diagnostics.hpp"
+#include "analysis/SimulationStats.hpp"
 
 namespace apex
 {
@@ -19,6 +20,15 @@ struct JsonWriter
    * @param stats 집계된 miss 통계
    */
   static void write_summary(std::ostream & os, const MissStats & stats);
+
+  /**
+   * @brief miss 요약과 캐시 동작 통계를 함께 JSON 객체로 출력한다.
+   * @param os          출력 스트림
+   * @param miss_stats  집계된 miss 통계
+   * @param cache_stats 전체 접근·계층·cycle 통계
+   */
+  static void write_summary(std::ostream & os, const MissStats & miss_stats,
+                            const SimulationStats & cache_stats);
 };
 
 }  // namespace apex

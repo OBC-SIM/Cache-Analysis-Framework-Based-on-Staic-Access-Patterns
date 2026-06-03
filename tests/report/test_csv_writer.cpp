@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include "analysis/Attribution.hpp"
+#include "analysis/SimulationStats.hpp"
 #include "report/CsvWriter.hpp"
 
 // CsvWriter::write_summary(os, stats)  → 헤더 + 데이터 1행
@@ -59,4 +60,46 @@ TEST(CsvWriter, object_breakdown_lists_all_objects)
   EXPECT_NE(out.find("B"), std::string::npos);
   EXPECT_NE(out.find("2"), std::string::npos);  // A miss count
   EXPECT_NE(out.find("1"), std::string::npos);  // B miss count
+}
+
+TEST(CsvWriter, extended_summary_contains_access_level_and_cycle_columns)
+{
+  apex::MissStats miss;
+  miss.cold = 1;
+  miss.capacity = 2;
+  miss.conflict = 0;
+  miss.load = 2;
+  miss.store = 1;
+
+  apex::SimulationStats cache;
+  cache.record_access("A", "load", 0, 4);
+  cache.record_access("A", "load", 1, 16);
+  cache.record_access("B", "store", 2, 136);
+
+  std::ostringstream oss;
+  apex::CsvWriter::write_summary(oss, miss, cache);
+  std::string out = oss.str();
+
+  EXPECT_NE(out.find("total_accesses"), std::string::npos);
+  EXPECT_NE(out.find("l1_hits"), std::string::npos);
+  EXPECT_NE(out.find("l1_misses"), std::string::npos);
+  EXPECT_NE(out.find("l2_hits"), std::string::npos);
+  EXPECT_NE(out.find("memory_accesses"), std::string::npos);
+  EXPECT_NE(out.find("total_cycles"), std::string::npos);
+  EXPECT_NE(out.find("average_cycles_per_access"), std::string::npos);
+}
+
+TEST(CsvWriter, object_breakdown_contains_accesses_hits_misses_and_rate)
+{
+  apex::SimulationStats cache;
+  cache.record_access("A", "load", 0, 4);
+  cache.record_access("A", "load", 0, 4);
+  cache.record_access("A", "store", 2, 136);
+
+  std::ostringstream oss;
+  apex::CsvWriter::write_object_breakdown(oss, cache);
+  std::string out = oss.str();
+
+  EXPECT_NE(out.find("object,accesses,hits,misses,miss_rate"), std::string::npos);
+  EXPECT_NE(out.find("A,3,2,1"), std::string::npos);
 }
