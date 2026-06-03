@@ -15,9 +15,8 @@ namespace
 
 void print_usage()
 {
-  std::cerr
-    << "Usage: apex-cache run <input.ap.json> --cache <cache.yaml> "
-       "[--shapes <shapes.yaml>] [--output <dir>]\n";
+  std::cerr << "Usage: apex-cache run <input.ap.json> --cache <cache.yaml> "
+               "[--output <dir>]\n";
 }
 
 /// --flag value 형태 인자에서 flag의 값을 찾는다. 없으면 빈 문자열.
@@ -38,7 +37,6 @@ int run_command(int argc, char * argv[])
   }
   const std::string input = argv[2];
   const std::string cache_yaml = find_opt(argc, argv, "--cache");
-  const std::string shapes_yaml = find_opt(argc, argv, "--shapes");
   std::string output = find_opt(argc, argv, "--output");
   if (output.empty()) output = "results";
 
@@ -51,13 +49,11 @@ int run_command(int argc, char * argv[])
 
   try
   {
-    apex::ApLoader loader;
-    if (!shapes_yaml.empty()) loader.with_shapes_yaml(shapes_yaml);
-    auto nodes = loader.load_json_file(input);
+    apex::ApProgram program = apex::ApLoader{}.load_program_file(input);
 
     HierarchyConfig config = YamlConfigParser::parse(cache_yaml);
     apex::Pipeline pipeline(config);
-    apex::PipelineResult result = pipeline.run(std::move(nodes));
+    apex::PipelineResult result = pipeline.run(program);
 
     std::ofstream summary_csv(output + "/summary.csv");
     apex::CsvWriter::write_summary(summary_csv, result.stats);

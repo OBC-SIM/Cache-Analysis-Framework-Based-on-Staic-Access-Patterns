@@ -72,7 +72,7 @@ Pipeline::Pipeline(HierarchyConfig config) : config_(std::move(config)) {}
 PipelineResult Pipeline::run(std::vector<std::unique_ptr<ApNode>> nodes)
 {
   // L1 line_size: 모든 L1이 동일하다고 가정, 첫 L1 값을 사용.
-  int line_size = 64;
+  int line_size = 32;
   for (const auto & c : config_.caches)
     if (c.role == "L1")
     {
@@ -93,7 +93,57 @@ PipelineResult Pipeline::run(std::vector<std::unique_ptr<ApNode>> nodes)
   // 3. 이벤트 스트림 생성 (nodes 소비)
   std::vector<AccessEvent> events = EventBuilder{}.build(std::move(nodes));
 
-  // 4. core별 FA 쉐도우 캐시 (cold/capacity/conflict 분류용)
+  // 4. 이벤트별 cache_line 계산 (v1: indices/shape → AddressMapper)
+  for (auto & e : events)
+  {
+    const ObjInfo & info = catalog.at(e.object_name);
+    uint64_t base = layout.base_of(e.object_name);
+
+    uint64_t byte_addr;
+    if (info.is_scalar || info.shape.empty() || e.indices.empty())
+      byte_addr = base;
+    else
+      byte_addr = AddressMapper::byte_address(base, e.indices, info.shape,
+                                              static_cast<uint64_t>(e.size));
+
+    e.cache_line =
+      AddressMapper::cache_line(byte_addr, static_cast<uint64_t>(line_size));
+  }
+
+  return simulate(events);
+}
+
+PipelineResult Pipeline::run(const ApProgram & program)
+{
+  int line_size = 32;
+  for (const auto & c : config_.caches)
+    if (c.role == "L1")
+    {
+      line_size = c.line_size;
+      break;
+    }
+
+  // 객체 배치: metadata.objects 크기로 line_size 정렬 (id 순, 결정적).
+  MemoryLayout layout(static_cast<uint64_t>(line_size));
+  for (const auto & [id, obj] : program.objects)
+    layout.add_object(id, obj.total_bytes());
+
+  std::vector<AccessEvent> events = EventBuilder{}.build_program(program);
+
+  for (auto & e : events)
+  {
+    uint64_t base = layout.base_of(e.object_name);
+    uint64_t byte_addr = base + static_cast<uint64_t>(e.byte_offset);
+    e.cache_line =
+      AddressMapper::cache_line(byte_addr, static_cast<uint64_t>(line_size));
+  }
+
+  return simulate(events);
+}
+
+PipelineResult Pipeline::simulate(const std::vector<AccessEvent> & events)
+{
+  // core별 FA 쉐도우 캐시 (cold/capacity/conflict 분류용)
   std::map<int, MissClassifier> classifiers;
   auto classifier_for = [&](int core) -> MissClassifier & {
     auto it = classifiers.find(core);
@@ -108,35 +158,20 @@ PipelineResult Pipeline::run(std::vector<std::unique_ptr<ApNode>> nodes)
         break;
       }
     }
-
     return classifiers.emplace(core, MissClassifier{lines}).first->second;
   };
 
   CacheHierarchy hierarchy(config_);
   PipelineResult result;
 
-  // 5. 이벤트별 시뮬레이션 및 귀속
   for (const auto & e : events)
   {
-    const ObjInfo & info = catalog.at(e.object_name);
-    uint64_t base = layout.base_of(e.object_name);
-
-    uint64_t byte_addr;
-    if (info.is_scalar || info.shape.empty() || e.indices.empty())
-      byte_addr = base;
-    else
-      byte_addr = AddressMapper::byte_address(base, e.indices, info.shape,
-                                              static_cast<uint64_t>(e.size));
-
-    uint64_t cache_line =
-      AddressMapper::cache_line(byte_addr, static_cast<uint64_t>(line_size));
-
     bool is_store = (e.op == "store");
     HierarchyAccessResult res =
-      hierarchy.access(e.core_id, cache_line, is_store);
+      hierarchy.access(e.core_id, e.cache_line, is_store);
     bool l1_miss = (res.miss_level >= 1);
 
-    auto miss_type = classifier_for(e.core_id).classify(cache_line, l1_miss);
+    auto miss_type = classifier_for(e.core_id).classify(e.cache_line, l1_miss);
 
     if (!l1_miss) continue;
 

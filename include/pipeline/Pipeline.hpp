@@ -4,7 +4,9 @@
 
 #include "analysis/Attribution.hpp"
 #include "analysis/Diagnostics.hpp"  // MissStats
+#include "ap/AccessEvent.hpp"
 #include "ap/ApNode.hpp"
+#include "ap/ApProgram.hpp"
 #include "cache/CacheConfig.hpp"
 
 namespace apex
@@ -42,8 +44,22 @@ public:
    */
   PipelineResult run(std::vector<std::unique_ptr<ApNode>> nodes);
 
+  /**
+   * @brief LAT v2 ApProgram을 받아 분석 결과를 생성한다.
+   *
+   * 객체 base는 metadata.objects 크기로 line_size 정렬 배치되고, 각 접근의
+   * byte_address = base + byte_offset(EventBuilder가 채움)으로 계산된다.
+   *
+   * @param program 파싱된 ApProgram
+   * @return miss 집계 및 귀속 결과
+   */
+  PipelineResult run(const ApProgram & program);
+
 private:
   HierarchyConfig config_;
+
+  /// cache_line이 채워진 이벤트 스트림을 시뮬레이션해 miss를 분류·귀속한다.
+  PipelineResult simulate(const std::vector<AccessEvent> & events);
 };
 
 }  // namespace apex
