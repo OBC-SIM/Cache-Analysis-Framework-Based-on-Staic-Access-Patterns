@@ -3,7 +3,10 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <variant>
 #include <vector>
+
+#include "ap/AccessLayout.hpp"
 
 namespace apex
 {
@@ -26,22 +29,21 @@ struct ApNode
 };
 
 /**
- * @brief access_path의 한 스텝(미평가 형태) — LAT v2.
+ * @brief 미평가 인덱스 스텝 — affine 식 문자열("i","i-1","5").
  *
- * index_expr는 affine 식 문자열("i","i-1","5")이며 EventBuilder가
- * 루프 문맥으로 평가한다. field는 구조체 필드 인덱스를 보관한다.
+ * EventBuilder가 루프 문맥으로 평가해 IndexStep으로 바꾼다.
  */
-struct RawAccessStep
+struct RawIndexStep
 {
-  enum class Kind
-  {
-    Index,
-    Field
-  };
-  Kind kind;
-  std::string index_expr;   ///< Kind::Index일 때 affine 식 문자열
-  int64_t field_index = 0;  ///< Kind::Field일 때 구조체 필드 인덱스
+  std::string expr;
 };
+
+/**
+ * @brief access_path의 한 스텝(미평가, sum 타입) — LAT v2.
+ *
+ * 미평가 인덱스(RawIndexStep)와 구조체 필드(FieldStep) 중 하나만 보유한다.
+ */
+using RawAccessStep = std::variant<RawIndexStep, FieldStep>;
 
 /**
  * @brief 스칼라 변수 접근 노드.

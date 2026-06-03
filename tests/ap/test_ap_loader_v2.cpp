@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <variant>
+
 #include "ap/ApLoader.hpp"
 #include "ap/ApNode.hpp"
 #include "ap/ApProgram.hpp"
@@ -158,8 +160,8 @@ TEST(ApLoaderV2, array_node_access_path_index_step)
   const ArrayNode* a = first_array(p.functions.at("f"));
   ASSERT_NE(a, nullptr);
   ASSERT_EQ(a->access_path.size(), 1u);
-  EXPECT_EQ(a->access_path[0].kind, RawAccessStep::Kind::Index);
-  EXPECT_EQ(a->access_path[0].index_expr, "i");
+  ASSERT_TRUE(std::holds_alternative<RawIndexStep>(a->access_path[0]));
+  EXPECT_EQ(std::get<RawIndexStep>(a->access_path[0]).expr, "i");
 }
 
 // ── 2차원 배열 ────────────────────────────────────────────────
@@ -176,8 +178,8 @@ TEST(ApLoaderV2, array_2d_access_path_has_two_index_steps)
   const ArrayNode* a = first_array(p.functions.at("f2"));
   ASSERT_NE(a, nullptr);
   ASSERT_EQ(a->access_path.size(), 2u);
-  EXPECT_EQ(a->access_path[0].index_expr, "i");
-  EXPECT_EQ(a->access_path[1].index_expr, "j");
+  EXPECT_EQ(std::get<RawIndexStep>(a->access_path[0]).expr, "i");
+  EXPECT_EQ(std::get<RawIndexStep>(a->access_path[1]).expr, "j");
 }
 
 // ── 구조체 metadata ───────────────────────────────────────────
@@ -211,9 +213,9 @@ TEST(ApLoaderV2, struct_access_path_has_field_index_field_sequence)
   const ArrayNode* a = first_array(p.functions.at("g"));
   ASSERT_NE(a, nullptr);
   ASSERT_EQ(a->access_path.size(), 3u);
-  EXPECT_EQ(a->access_path[0].kind, RawAccessStep::Kind::Field);
-  EXPECT_EQ(a->access_path[1].kind, RawAccessStep::Kind::Index);
-  EXPECT_EQ(a->access_path[2].kind, RawAccessStep::Kind::Field);
+  EXPECT_TRUE(std::holds_alternative<FieldStep>(a->access_path[0]));
+  EXPECT_TRUE(std::holds_alternative<RawIndexStep>(a->access_path[1]));
+  EXPECT_TRUE(std::holds_alternative<FieldStep>(a->access_path[2]));
 }
 
 TEST(ApLoaderV2, struct_access_path_field_index_value)
@@ -221,6 +223,6 @@ TEST(ApLoaderV2, struct_access_path_field_index_value)
   ApProgram p = loadStruct();
   const ArrayNode* a = first_array(p.functions.at("g"));
   ASSERT_NE(a, nullptr);
-  EXPECT_EQ(a->access_path[0].field_index, 1);  // items
-  EXPECT_EQ(a->access_path[2].field_index, 0);  // x
+  EXPECT_EQ(std::get<FieldStep>(a->access_path[0]).index, 1);  // items
+  EXPECT_EQ(std::get<FieldStep>(a->access_path[2]).index, 0);  // x
 }

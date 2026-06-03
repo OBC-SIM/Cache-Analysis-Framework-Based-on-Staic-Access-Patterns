@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace apex
@@ -52,19 +53,23 @@ struct ObjectLayout
   }
 };
 
-/**
- * @brief access_path 한 스텝. index 값은 EventBuilder가 IndexExpr로 평가해 채운다.
- */
-struct AccessStep
+/** @brief 평가된 배열 인덱스 스텝. */
+struct IndexStep
 {
-  enum class Kind
-  {
-    Index,
-    Field
-  };
-  Kind kind;
-  int64_t index_value = 0;  ///< Kind::Index일 때 평가된 정수 인덱스
-  int64_t field_index = 0;  ///< Kind::Field일 때 구조체 필드 인덱스
+  int64_t value = 0;
 };
+
+/** @brief 구조체 필드 스텝 (raw·evaluated 공용). */
+struct FieldStep
+{
+  int64_t index = 0;
+};
+
+/**
+ * @brief 평가된 access_path 한 스텝 (sum 타입).
+ *
+ * 인덱스 스텝(평가된 정수)과 필드 스텝 중 하나만 보유한다.
+ */
+using AccessStep = std::variant<IndexStep, FieldStep>;
 
 }  // namespace apex

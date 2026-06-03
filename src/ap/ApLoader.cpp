@@ -189,19 +189,11 @@ std::unique_ptr<ApNode> parse_node_v2(const json & j)
     if (j.contains("access_path"))
       for (const auto & s : j["access_path"])
       {
-        RawAccessStep step;
         const std::string kind = s.at("kind").get<std::string>();
         if (kind == "field")
-        {
-          step.kind = RawAccessStep::Kind::Field;
-          step.field_index = s.value("index", int64_t{0});
-        }
+          n->access_path.push_back(FieldStep{s.value("index", int64_t{0})});
         else
-        {
-          step.kind = RawAccessStep::Kind::Index;
-          step.index_expr = s.at("value").get<std::string>();
-        }
-        n->access_path.push_back(std::move(step));
+          n->access_path.push_back(RawIndexStep{s.at("value").get<std::string>()});
       }
     return n;
   }

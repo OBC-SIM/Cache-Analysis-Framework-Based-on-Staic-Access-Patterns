@@ -1,6 +1,7 @@
 #include "ap/AddressResolver.hpp"
 
 #include <cstddef>
+#include <variant>
 
 namespace apex
 {
@@ -18,10 +19,11 @@ int64_t resolve_offset(const ObjectLayout& obj,
   std::size_t i = 0;
   while (i < path.size())
   {
-    if (path[i].kind == AccessStep::Kind::Field)
+    if (std::holds_alternative<FieldStep>(path[i]))
     {
+      const FieldStep& step = std::get<FieldStep>(path[i]);
       const StructLayout& st = structs.at(struct_type);
-      const FieldLayout& f = st.fields.at(static_cast<std::size_t>(path[i].field_index));
+      const FieldLayout& f = st.fields.at(static_cast<std::size_t>(step.index));
       offset += f.offset;
       shape = f.shape;
       elem_size = f.elem_size;
@@ -32,9 +34,9 @@ int64_t resolve_offset(const ObjectLayout& obj,
 
     // 연속된 index 스텝을 모아 trailing 정렬 row-major로 누적.
     std::vector<int64_t> idxs;
-    while (i < path.size() && path[i].kind == AccessStep::Kind::Index)
+    while (i < path.size() && std::holds_alternative<IndexStep>(path[i]))
     {
-      idxs.push_back(path[i].index_value);
+      idxs.push_back(std::get<IndexStep>(path[i]).value);
       ++i;
     }
 

@@ -9,6 +9,8 @@
 
 using apex::AccessStep;
 using apex::FieldLayout;
+using apex::FieldStep;
+using apex::IndexStep;
 using apex::ObjectLayout;
 using apex::resolve_offset;
 using apex::StructLayout;
@@ -17,11 +19,11 @@ namespace
 {
 AccessStep idx(int64_t v)
 {
-  return AccessStep{AccessStep::Kind::Index, v, 0};
+  return IndexStep{v};
 }
 AccessStep fld(int64_t i)
 {
-  return AccessStep{AccessStep::Kind::Field, 0, i};
+  return FieldStep{i};
 }
 }  // namespace
 
