@@ -120,11 +120,11 @@ cmake --build build
 ## 사용법
 
 ```bash
-# 단일 실행 (구현 완료)
-apex-cache run input.ap.json --cache cache.yaml [--shapes shapes.yaml] [--output results/]
+# 단일 실행 (구현 완료) — 입력은 APE LAT v2 JSON
+apex-cache run input_g_ape.json --cache cache.yaml [--output results/]
 
 # sweep: L1 용량 범위 탐색 (예정)
-apex-cache sweep input.ap.json --cache cache.yaml --l1-sizes 4K,8K,16K,32K
+apex-cache sweep input_g_ape.json --cache cache.yaml --l1-sizes 4K,8K,16K,32K
 ```
 
 `run`은 `--output`(기본 `results/`)에 `summary.csv`, `summary.json`,
@@ -169,15 +169,8 @@ memory:
   delay_cycles: 120
 ```
 
-**shapes.yaml** — AP JSON에 shape가 없는 배열 보완
-
-```yaml
-shapes:
-  A: [1000, 1000]
-  B: [1000, 1000]
-element_size: 4
-object_alignment: 64
-```
+> 배열 shape·elem_size·구조체 layout은 LAT v2 입력의 `metadata`가 제공하므로
+> 별도 shapes.yaml은 필요 없다.
 
 **mapping.yaml** — SMP 함수→core 정적 매핑 (선택)
 
@@ -224,6 +217,7 @@ Rank  Loop    Access       Miss%  Share  Miss Type   Hint
 | 6 | Report Layer (CSV / JSON / Markdown) | ✅ 완료 |
 | 7 | CLI (`run`) + 통합 테스트 | ✅ 완료 |
 | 8 | Python 후처리 scripts | ⬜ 예정 |
+| 9 | LAT v2 입력 전환 (access_path, 구조체) | ✅ 완료 |
 
 ### 알려진 제약 (Known Limitations)
 
@@ -231,9 +225,10 @@ Rank  Loop    Access       Miss%  Share  Miss Type   Hint
 |------|------|
 | `sweep` 모드 | 미구현 — `run`만 제공 |
 | AMAT / delay 출력 | 미구현 — 현재 출력은 miss 개수만. `cache.yaml`의 `delay_cycles`는 시뮬레이션에 쓰이나 리포트에 노출 안 됨 |
-| 함수 간 call 전개 | Pipeline 미지원 (top-level 노드만). region inclusive/exclusive는 Attribution 단위 테스트로만 검증 |
+| 함수 간 call 인자 바인딩 | callee param↔실인자 치환 미지원 → 인라인 헬퍼가 param으로 인덱싱하면 오류/오귀속. 인자 바인딩 인라이닝 예정 (예: `examples/test_call`) |
+| 포인터-param 다차원 size | 객체 전체 크기 과소추정 → 다객체 spacing 부정확 (call 인자 바인딩으로 대부분 해소 예정) |
+| CLI `--output` 디렉터리 | 자동 생성 안 함 — 디렉터리를 미리 만들어야 출력됨 |
 | 멀티코어 | 설정은 가능하나 통합 검증은 단일 코어 기준 |
-| **AP 입력 v2 전환** | **진행 중.** APE가 access_path 기반 v2(`*_g_ape.json`)를 출력하나 현재 ApLoader는 구 형식만 파싱 → `run examples/*.json`은 아직 실패. v2 전용 마이그레이션 작업 중 (구조체 `metadata.structs` 포함) |
 
 ---
 
@@ -244,7 +239,8 @@ APEX-Cache/
   CMakeLists.txt
   frontend/                    ← Access-Pattern-Extractor 서브모듈
   include/
-    ap/                        ← ApNode, ApLoader, EventBuilder, AccessEvent
+    ap/                        ← ApNode, ApLoader(v2), ApProgram, AccessLayout,
+                                  IndexExpr, AddressResolver, EventBuilder, AccessEvent
     memory/                    ← MemoryLayout, AddressMapper
     cache/                     ← CacheConfig, YamlConfigParser, CacheHierarchy
     analysis/                  ← Attribution, MissClassifier, Diagnostics
