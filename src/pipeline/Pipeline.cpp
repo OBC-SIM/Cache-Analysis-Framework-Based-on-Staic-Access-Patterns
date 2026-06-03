@@ -1,9 +1,6 @@
 #include "pipeline/Pipeline.hpp"
 
 #include <map>
-#include <stdexcept>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "analysis/MissClassifier.hpp"
 #include "ap/AccessEvent.hpp"
@@ -15,103 +12,7 @@
 namespace apex
 {
 
-namespace
-{
-
-/// 객체 카탈로그 항목: shape/elem_size는 byte_address 계산에, total_bytes는
-/// 배치에 쓴다.
-struct ObjInfo
-{
-  std::vector<int64_t> shape;
-  int64_t elem_size = 4;
-  bool is_scalar = false;
-};
-
-/// ApNode 트리를 등장 순서대로 walk하며 array/scalar 객체를 수집한다.
-void collect_objects(const ApNode & node,
-                     std::unordered_map<std::string, ObjInfo> & seen,
-                     std::vector<std::string> & order)
-{
-  switch (node.kind())
-  {
-    case ApNodeKind::Scalar: {
-      const auto & s = static_cast<const ScalarNode &>(node);
-      if (seen.emplace(s.name, ObjInfo{{}, 4, true}).second)
-        order.push_back(s.name);
-      break;
-    }
-    case ApNodeKind::Array: {
-      const auto & a = static_cast<const ArrayNode &>(node);
-      if (seen.emplace(a.name, ObjInfo{a.shape, a.elem_size, false}).second)
-        order.push_back(a.name);
-      break;
-    }
-    case ApNodeKind::Loop: {
-      const auto & l = static_cast<const LoopNode &>(node);
-      for (const auto & child : l.body) collect_objects(*child, seen, order);
-      break;
-    }
-    case ApNodeKind::Call:
-      // MVP: 함수 간 call 전개 미지원 → callee 객체는 카탈로그에 포함하지 않음
-      break;
-  }
-}
-
-uint64_t total_bytes(const ObjInfo & info)
-{
-  if (info.is_scalar) return static_cast<uint64_t>(info.elem_size);
-  uint64_t n = 1;
-  for (int64_t d : info.shape) n *= static_cast<uint64_t>(d);
-  return n * static_cast<uint64_t>(info.elem_size);
-}
-
-}  // namespace
-
 Pipeline::Pipeline(HierarchyConfig config) : config_(std::move(config)) {}
-
-PipelineResult Pipeline::run(std::vector<std::unique_ptr<ApNode>> nodes)
-{
-  // L1 line_size: 모든 L1이 동일하다고 가정, 첫 L1 값을 사용.
-  int line_size = 32;
-  for (const auto & c : config_.caches)
-    if (c.role == "L1")
-    {
-      line_size = c.line_size;
-      break;
-    }
-
-  // 1. 객체 카탈로그 수집
-  std::unordered_map<std::string, ObjInfo> catalog;
-  std::vector<std::string> order;
-  for (const auto & n : nodes) collect_objects(*n, catalog, order);
-
-  // 2. 메모리 배치 (line_size 정렬 = miss 상한 모델)
-  MemoryLayout layout(static_cast<uint64_t>(line_size));
-  for (const auto & name : order)
-    layout.add_object(name, total_bytes(catalog[name]));
-
-  // 3. 이벤트 스트림 생성 (nodes 소비)
-  std::vector<AccessEvent> events = EventBuilder{}.build(std::move(nodes));
-
-  // 4. 이벤트별 cache_line 계산 (v1: indices/shape → AddressMapper)
-  for (auto & e : events)
-  {
-    const ObjInfo & info = catalog.at(e.object_name);
-    uint64_t base = layout.base_of(e.object_name);
-
-    uint64_t byte_addr;
-    if (info.is_scalar || info.shape.empty() || e.indices.empty())
-      byte_addr = base;
-    else
-      byte_addr = AddressMapper::byte_address(base, e.indices, info.shape,
-                                              static_cast<uint64_t>(e.size));
-
-    e.cache_line =
-      AddressMapper::cache_line(byte_addr, static_cast<uint64_t>(line_size));
-  }
-
-  return simulate(events);
-}
 
 PipelineResult Pipeline::run(const ApProgram & program)
 {
