@@ -25,6 +25,7 @@ file(GLOB_RECURSE APEX_LIB_SOURCES
     src/analysis/*.cpp
     src/report/*.cpp
     src/pipeline/*.cpp
+    src/cli/*.cpp
 )
 
 if(APEX_LIB_SOURCES)
@@ -92,6 +93,13 @@ endforeach()
 # Phase 7 — Integration
 file(GLOB INTEGRATION_TESTS tests/integration/*.cpp)
 foreach(src ${INTEGRATION_TESTS})
+    get_filename_component(name ${src} NAME_WE)
+    apex_add_test(${name} ${src})
+endforeach()
+
+# CLI
+file(GLOB CLI_TESTS tests/cli/*.cpp)
+foreach(src ${CLI_TESTS})
     get_filename_component(name ${src} NAME_WE)
     apex_add_test(${name} ${src})
 endforeach()
