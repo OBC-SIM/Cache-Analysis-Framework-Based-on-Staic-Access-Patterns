@@ -31,7 +31,9 @@ struct AccessEvent
 
   std::string op;  ///< "load" | "store"
   std::string object_name;
-  std::vector<int64_t> indices;  ///< 평가된 정수 인덱스
+  std::vector<int64_t> indices;  ///< (v1) 평가된 정수 인덱스
+
+  int64_t byte_offset = 0;  ///< (v2) 객체 base 기준 오프셋 (EventBuilder가 채움)
 
   uint64_t byte_address = 0;
   uint64_t cache_line = 0;
