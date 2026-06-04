@@ -171,7 +171,7 @@ mappings:
 | 5 | Analysis Layer (Attribution, MissClassifier, Diagnostics) | ✅ 완료 |
 | 6 | Report Layer (CSV / JSON / Markdown) | ✅ 완료 |
 | 7 | CLI (`run`) + 통합 테스트 | ✅ 완료 |
-| 8 | Python 후처리 scripts | ⬜ 예정 |
+| 8 | Python 후처리·시각화 (`backend/`) | ✅ 완료 |
 | 9 | LAT v2 입력 전환 (access_path, 구조체) | ✅ 완료 |
 
 ### 알려진 제약 (Known Limitations)
@@ -179,7 +179,6 @@ mappings:
 | 항목 | 현황 |
 |------|------|
 | `sweep` 모드 | 미구현 — `run`만 제공 |
-| Python 후처리 시각화 | 미구현 — 리포트 파일은 생성되나 플롯 생성 scripts는 예정 (Phase 8) |
 | 멀티코어 | 설정은 가능하나 통합 검증은 단일 코어 기준 |
 
 ---
