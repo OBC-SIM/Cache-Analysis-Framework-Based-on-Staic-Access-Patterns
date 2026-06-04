@@ -203,7 +203,7 @@ APEX-Cache/
   backend/                     ← Python 후처리·시각화 (Phase 8)
     reports.py                 ← 리포트 로딩·집계
     plotting/                  ← style, bars, figures
-    __main__.py                ← CLI (python3 -m backend)
+    main.py                    ← CLI (python3 backend/main.py)
     tests/                     ← pytest
   results/                     ← 출력 디렉터리 (gitignore)
 ```

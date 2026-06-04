@@ -5,16 +5,20 @@
   object_misses.png   — 객체별 load/store miss (상위 N; 격차 크면 broken axis)
   cache_hit_miss.png  — L1/L2 hit/miss 비율 (격차 크면 broken axis)
 
-사용법:
-  python3 -m backend --results results/ [--output results/plots] [--top 10]
+사용법 (저장소 루트에서):
+  python3 backend/main.py --results results/ [--output results/plots] [--top 10]
 """
 
 import argparse
 import os
+import sys
 from pathlib import Path
 
-from backend import reports
-from backend.plotting import figures, style
+# 파일을 직접 실행할 때 `backend` 패키지를 import할 수 있도록 레포 루트를 경로에 추가.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from backend import reports  # noqa: E402
+from backend.plotting import figures, style  # noqa: E402
 
 
 def generate(results_dir, output_dir=None, top_n: int = 10) -> list:
