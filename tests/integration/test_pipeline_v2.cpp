@@ -46,6 +46,15 @@ HierarchyConfig make_config(uint64_t l1_bytes, int line_size, int assoc)
   return cfg;
 }
 
+HierarchyConfig make_write_through_no_allocate_config(uint64_t l1_bytes,
+                                                      int line_size, int assoc)
+{
+  auto cfg = make_config(l1_bytes, line_size, assoc);
+  cfg.caches[0].write_policy = WritePolicy::WriteThrough;
+  cfg.caches[0].write_allocate = false;
+  return cfg;
+}
+
 PipelineResult run(const char* json, HierarchyConfig cfg)
 {
   ApProgram p = ApLoader{}.load_program_string(json);
@@ -200,6 +209,18 @@ TEST(PipelineV2, per_object_access_stats_include_hits)
   EXPECT_EQ(b.accesses, 4096u);
   EXPECT_EQ(b.misses, 256u);
   EXPECT_EQ(b.hits, 3840u);
+}
+
+TEST(PipelineV2, local_2d_respects_no_write_allocate_store_misses)
+{
+  auto r = run(kLocal2d, make_write_through_no_allocate_config(1u << 20, 64, 8));
+
+  EXPECT_EQ(r.stats.load, 256u);
+  EXPECT_EQ(r.stats.store, 4096u);
+  EXPECT_EQ(r.cache_stats.l1_misses, 4352u);
+  EXPECT_EQ(r.cache_stats.objects.at("fn::A").misses, 4096u);
+  EXPECT_EQ(r.cache_stats.objects.at("fn::A").hits, 0u);
+  EXPECT_EQ(r.cache_stats.objects.at("fn::B").misses, 256u);
 }
 
 TEST(PipelineV2, stride_equal_to_line_misses_every_access)

@@ -15,8 +15,8 @@ struct HierarchyAccessResult
 /**
  * @brief private L1(s) → shared L2 → Memory 체인 시뮬레이터.
  *
- * L1 미스 시 자동으로 L1에 채우고, L2 미스 시 L2에도 채운다.
- * write-back 정책: L1 스토어 히트는 L2에 전파하지 않는다.
+ * cache.yaml의 write_policy와 write_allocate 설정에 따라 store miss fill과
+ * write-through 전파 여부를 결정한다.
  *
  * @pre config.caches의 role="L1" 항목은 private_to >= 0이어야 한다.
  */
@@ -32,6 +32,7 @@ private:
     CacheLevel level;
     int delay_cycles = 0;
     WritePolicy write_policy = WritePolicy::WriteBack;
+    bool write_allocate = true;
   };
 
   std::vector<LevelEntry> l1s_;  // indexed by core_id

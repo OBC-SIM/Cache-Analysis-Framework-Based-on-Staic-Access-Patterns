@@ -8,9 +8,17 @@ CacheLevel::CacheLevel(int num_sets, int num_ways) : num_sets_(num_sets)
 
 LevelAccessResult CacheLevel::access(uint64_t cache_line, bool is_store)
 {
+  CacheAccessOptions options;
+  options.is_store = is_store;
+  return access(cache_line, options);
+}
+
+LevelAccessResult CacheLevel::access(uint64_t cache_line,
+                                     const CacheAccessOptions & options)
+{
   uint64_t si = set_index_of(cache_line, num_sets_);
   uint64_t tag = tag_of(cache_line, num_sets_);
-  auto sr = sets_[si].access(tag, is_store);
+  auto sr = sets_[si].access(tag, options);
   return {sr.hit, sr};
 }
 

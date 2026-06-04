@@ -45,3 +45,31 @@ TEST(CacheSet, dirty_bit_set_on_store)
   auto r = set.access(20, false);  // evict tag=10
   EXPECT_TRUE(r.evicted_dirty);
 }
+
+TEST(CacheSet, miss_without_allocate_does_not_fill)
+{
+  CacheSet set(1);
+  CacheAccessOptions opts;
+  opts.allocate_on_miss = false;
+
+  auto first = set.access(10, opts);
+  auto second = set.access(10, false);
+
+  EXPECT_FALSE(first.hit);
+  EXPECT_FALSE(second.hit);
+}
+
+TEST(CacheSet, store_hit_can_skip_dirty_mark)
+{
+  CacheSet set(1);
+  set.access(10, false);
+
+  CacheAccessOptions opts;
+  opts.is_store = true;
+  opts.mark_dirty_on_store = false;
+  auto hit = set.access(10, opts);
+  auto evict = set.access(20, false);
+
+  EXPECT_TRUE(hit.hit);
+  EXPECT_FALSE(evict.evicted_dirty);
+}

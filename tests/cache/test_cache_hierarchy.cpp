@@ -39,6 +39,14 @@ HierarchyConfig make_config()
   cfg.memory.delay_cycles = 120;
   return cfg;
 }
+
+HierarchyConfig make_write_through_no_allocate_config()
+{
+  auto cfg = make_config();
+  cfg.caches[0].write_policy = WritePolicy::WriteThrough;
+  cfg.caches[0].write_allocate = false;
+  return cfg;
+}
 }  // namespace
 
 TEST(CacheHierarchy, l1_hit_returns_l1_delay_only)
@@ -84,5 +92,27 @@ TEST(CacheHierarchy, write_back_does_not_propagate_on_store_hit)
   h.access(0, 0, false);          // fill L1
   auto r = h.access(0, 0, true);  // store hit at L1 → no L2 write
   EXPECT_EQ(r.delay_cycles, 4u);
+  EXPECT_EQ(r.miss_level, 0);
+}
+
+TEST(CacheHierarchy, store_miss_without_write_allocate_does_not_fill_l1)
+{
+  CacheHierarchy h(make_write_through_no_allocate_config());
+
+  h.access(0, 0, true);           // store miss → L2/memory, no L1 fill
+  auto r = h.access(0, 0, true);  // store miss again at L1, L2 hit
+
+  EXPECT_EQ(r.delay_cycles, 4u + 12u);
+  EXPECT_EQ(r.miss_level, 1);
+}
+
+TEST(CacheHierarchy, write_through_store_hit_propagates_to_l2)
+{
+  CacheHierarchy h(make_write_through_no_allocate_config());
+
+  h.access(0, 0, false);          // load fills L1 and L2
+  auto r = h.access(0, 0, true);  // L1 hit store also writes through to L2
+
+  EXPECT_EQ(r.delay_cycles, 4u + 12u);
   EXPECT_EQ(r.miss_level, 0);
 }
