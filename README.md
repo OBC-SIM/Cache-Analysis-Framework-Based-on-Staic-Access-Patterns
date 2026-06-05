@@ -16,7 +16,7 @@ C/C++ 소스 코드
   → APEX-Cache
       ├─ AP Layer       : JSON 파싱 → AccessEvent 스트림 복원
       ├─ Memory Layer   : flat address 배치 → byte_address 계산
-      ├─ Cache Layer    : XML 설정형 multi-L1/L2/Memory 시뮬레이션
+      ├─ Cache Layer    : YAML 설정형 multi-L1/L2/Memory 시뮬레이션
       ├─ Analysis Layer : cold/capacity/conflict miss 귀속 및 진단
       └─ Report Layer   : CSV / JSON / Markdown 출력
 ```
@@ -27,11 +27,12 @@ C/C++ 소스 코드
 
 - AP JSON → AccessEvent 선형 스트림 복원 (루프 언롤, call 인라이닝 + 인자 바인딩)
 - YAML 기반 캐시 계층 설정 (`cache.yaml`) — private L1 × N + shared L2 + Memory
-- LRU replacement, write-back / write-through 정책
+- LRU replacement, write-back / write-through, write-allocate / no-write-allocate 정책
 - cold / capacity / conflict miss 분류
+- L1/L2 hit율, cycle, write-through/writeback/dirty eviction 통계
 - inclusive / exclusive Region 집계
 - rule-based 최적화 진단 (padding, blocking, loop interchange 힌트)
-- 출력: 입력명 기반 `<name>.csv`/`.json` (miss 분류 + L1/L2 hit율 + cycle 통계), `<name>_diagnostics.md`, `<name>_objects.csv`
+- 출력: 입력명 기반 `<name>.csv`/`.json` (miss 분류 + L1/L2 hit율 + cycle/write traffic 통계), `<name>_diagnostics.md`, `<name>_objects.csv`
 
 ---
 
@@ -94,7 +95,7 @@ ctest --test-dir build
 | `--cache <cache.yaml>` | 캐시 계층 설정 파일. `run`에서 필수 |
 | `--output <dir>` | 리포트 출력 디렉터리. 기본값은 `results` |
 | `--quiet` | 자동화용 최소 출력. 결과 디렉터리만 표시 |
-| `--verbose` | 캐시 설정 요약까지 함께 출력 |
+| `--verbose` | 캐시 설정과 write traffic 요약까지 함께 출력 |
 | `--no-color` | ANSI color 없이 plain text로 출력 |
 | `-h`, `--help` | 도움말 출력 |
 
@@ -144,6 +145,11 @@ memory:
   name: Memory
   delay_cycles: 120
 ```
+
+`write_policy`는 `write-back` 또는 `write-through`를 지원한다. `write_allocate`가
+`false`인 store miss는 해당 계층에 cache line을 적재하지 않고 다음 계층으로
+전달된다. 리포트의 `write_traffic`에는 `write_through_writes`, `writebacks`,
+`dirty_evictions`, `writeback_cycles`가 포함된다.
 
 > 배열 shape·elem_size·구조체 layout은 LAT v2 입력의 `metadata`가 제공하므로
 > 별도 shapes.yaml은 필요 없다.

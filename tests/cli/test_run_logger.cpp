@@ -94,6 +94,23 @@ TEST(RunLogger, default_summary_contains_miss_breakdown)
   EXPECT_NE(out.find("store:    13"), std::string::npos);
 }
 
+TEST(RunLogger, default_summary_contains_write_traffic)
+{
+  auto ctx = make_context();
+  ctx.cache_stats.write_through_writes = 13;
+  ctx.cache_stats.writebacks = 2;
+  ctx.cache_stats.dirty_evictions = 2;
+  ctx.cache_stats.writeback_cycles = 24;
+
+  const std::string out = RunLogger::format(ctx, RunLogMode::Default);
+
+  EXPECT_NE(out.find("Write traffic"), std::string::npos);
+  EXPECT_NE(out.find("write-through: 13"), std::string::npos);
+  EXPECT_NE(out.find("writebacks:    2"), std::string::npos);
+  EXPECT_NE(out.find("dirty evict:   2"), std::string::npos);
+  EXPECT_NE(out.find("wb cycles:     24"), std::string::npos);
+}
+
 TEST(RunLogger, default_summary_lists_top_objects_by_misses)
 {
   const std::string out = RunLogger::format(make_context(), RunLogMode::Default);

@@ -41,13 +41,25 @@ struct SimulationStats
   uint64_t l2_misses = 0;
   uint64_t memory_accesses = 0;
   uint64_t total_cycles = 0;
+  uint64_t write_through_writes = 0;
+  uint64_t writebacks = 0;
+  uint64_t dirty_evictions = 0;
+  uint64_t writeback_cycles = 0;
   std::unordered_map<std::string, ObjectAccessStats> objects;
 
   void record_access(const std::string & object_name, const std::string & op,
-                     int miss_level, uint64_t delay_cycles)
+                     int miss_level, uint64_t delay_cycles,
+                     uint64_t access_write_through_writes = 0,
+                     uint64_t access_writebacks = 0,
+                     uint64_t access_dirty_evictions = 0,
+                     uint64_t access_writeback_cycles = 0)
   {
     total_accesses += 1;
     total_cycles += delay_cycles;
+    write_through_writes += access_write_through_writes;
+    writebacks += access_writebacks;
+    dirty_evictions += access_dirty_evictions;
+    writeback_cycles += access_writeback_cycles;
 
     const bool is_store = (op == "store");
     if (is_store)

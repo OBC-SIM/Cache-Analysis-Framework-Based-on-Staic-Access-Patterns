@@ -112,3 +112,19 @@ TEST(JsonWriter, extended_summary_preserves_legacy_miss_fields)
   EXPECT_EQ(j["load"].get<uint64_t>(), 4u);
   EXPECT_EQ(j["store"].get<uint64_t>(), 2u);
 }
+
+TEST(JsonWriter, extended_summary_contains_write_traffic_stats)
+{
+  apex::MissStats miss;
+  apex::SimulationStats cache;
+  cache.record_access("A", "store", 0, 16, 3, 2, 1, 24);
+
+  std::ostringstream oss;
+  apex::JsonWriter::write_summary(oss, miss, cache);
+  auto j = nlohmann::json::parse(oss.str());
+
+  EXPECT_EQ(j["write_traffic"]["write_through_writes"].get<uint64_t>(), 3u);
+  EXPECT_EQ(j["write_traffic"]["writebacks"].get<uint64_t>(), 2u);
+  EXPECT_EQ(j["write_traffic"]["dirty_evictions"].get<uint64_t>(), 1u);
+  EXPECT_EQ(j["write_traffic"]["writeback_cycles"].get<uint64_t>(), 24u);
+}

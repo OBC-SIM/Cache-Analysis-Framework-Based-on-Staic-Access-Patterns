@@ -72,8 +72,10 @@ PipelineResult Pipeline::simulate(const std::vector<AccessEvent> & events)
       hierarchy.access(e.core_id, e.cache_line, is_store);
     bool l1_miss = (res.miss_level >= 1);
 
-    result.cache_stats.record_access(e.object_name, e.op, res.miss_level,
-                                     res.delay_cycles);
+    result.cache_stats.record_access(
+      e.object_name, e.op, res.miss_level, res.delay_cycles,
+      res.write_through_writes, res.writebacks, res.dirty_evictions,
+      res.writeback_cycles);
 
     auto miss_type = classifier_for(e.core_id).classify(e.cache_line, l1_miss);
 

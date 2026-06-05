@@ -116,3 +116,27 @@ TEST(CacheHierarchy, write_through_store_hit_propagates_to_l2)
   EXPECT_EQ(r.delay_cycles, 4u + 12u);
   EXPECT_EQ(r.miss_level, 0);
 }
+
+TEST(CacheHierarchy, write_through_store_hit_reports_write_traffic)
+{
+  CacheHierarchy h(make_write_through_no_allocate_config());
+
+  h.access(0, 0, false);
+  auto r = h.access(0, 0, true);
+
+  EXPECT_EQ(r.write_through_writes, 1u);
+  EXPECT_EQ(r.writebacks, 0u);
+  EXPECT_EQ(r.dirty_evictions, 0u);
+}
+
+TEST(CacheHierarchy, dirty_l1_eviction_reports_writeback)
+{
+  CacheHierarchy h(make_config());
+
+  h.access(0, 0, true);          // write-back store miss fills dirty L1 line
+  auto r = h.access(0, 1, false);  // evicts dirty line 0 from 1-way L1
+
+  EXPECT_EQ(r.writebacks, 1u);
+  EXPECT_EQ(r.dirty_evictions, 1u);
+  EXPECT_EQ(r.writeback_cycles, 12u);
+}

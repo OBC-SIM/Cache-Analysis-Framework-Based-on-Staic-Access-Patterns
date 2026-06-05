@@ -48,6 +48,12 @@ void JsonWriter::write_summary(std::ostream & os, const MissStats & miss_stats,
     {"total", cache_stats.total_cycles},
     {"average_per_access", cache_stats.average_cycles_per_access()},
   };
+  j["write_traffic"] = {
+    {"write_through_writes", cache_stats.write_through_writes},
+    {"writebacks", cache_stats.writebacks},
+    {"dirty_evictions", cache_stats.dirty_evictions},
+    {"writeback_cycles", cache_stats.writeback_cycles},
+  };
 
   os << j.dump(2) << '\n';
 }

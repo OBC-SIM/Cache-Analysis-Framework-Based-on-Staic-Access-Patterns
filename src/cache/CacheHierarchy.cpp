@@ -16,6 +16,37 @@ CacheAccessOptions options_for(bool is_store, WritePolicy write_policy,
   return options;
 }
 
+void record_dirty_l2_eviction(HierarchyAccessResult & result,
+                              const SetAccessResult & set_result,
+                              int mem_delay)
+{
+  if (!set_result.has_eviction || !set_result.evicted_dirty) return;
+  result.dirty_evictions += 1;
+  result.writebacks += 1;
+  result.writeback_cycles += static_cast<uint64_t>(mem_delay);
+  result.delay_cycles += static_cast<uint64_t>(mem_delay);
+}
+
+void writeback_l1_victim_to_l2(HierarchyAccessResult & result,
+                               CacheLevel & l2, WritePolicy l2_write_policy,
+                               bool l2_write_allocate, int l2_delay,
+                               uint64_t cache_line, int mem_delay)
+{
+  result.dirty_evictions += 1;
+  result.writebacks += 1;
+  result.writeback_cycles += static_cast<uint64_t>(l2_delay);
+  result.delay_cycles += static_cast<uint64_t>(l2_delay);
+
+  auto r2 = l2.access(
+    cache_line, options_for(true, l2_write_policy, l2_write_allocate));
+  if (!r2.hit)
+  {
+    result.delay_cycles += static_cast<uint64_t>(mem_delay);
+    result.writeback_cycles += static_cast<uint64_t>(mem_delay);
+  }
+  record_dirty_l2_eviction(result, r2.set_result, mem_delay);
+}
+
 }  // namespace
 
 CacheHierarchy::CacheHierarchy(const HierarchyConfig & config)
@@ -58,27 +89,43 @@ HierarchyAccessResult CacheHierarchy::access(int core_id, uint64_t cache_line,
   auto r1 = l1e.level.access(cache_line, l1_options);
   if (r1.hit)
   {
-    uint64_t delay = static_cast<uint64_t>(l1e.delay_cycles);
+    HierarchyAccessResult result{static_cast<uint64_t>(l1e.delay_cycles), 0};
     if (is_store && l1e.write_policy == WritePolicy::WriteThrough)
     {
       auto r2 = l2_.level.access(
         cache_line, options_for(true, l2_.write_policy, l2_.write_allocate));
-      delay += static_cast<uint64_t>(l2_.delay_cycles);
-      if (!r2.hit) delay += static_cast<uint64_t>(mem_delay_);
+      result.write_through_writes += 1;
+      result.delay_cycles += static_cast<uint64_t>(l2_.delay_cycles);
+      if (!r2.hit) result.delay_cycles += static_cast<uint64_t>(mem_delay_);
+      record_dirty_l2_eviction(result, r2.set_result, mem_delay_);
     }
-    return {delay, 0};
+    return result;
   }
 
   const bool l2_store =
     is_store && (l1e.write_policy == WritePolicy::WriteThrough ||
                  !l1e.write_allocate);
+  HierarchyAccessResult result{
+    static_cast<uint64_t>(l1e.delay_cycles),
+    2};
+  if (is_store && l1e.write_policy == WritePolicy::WriteThrough)
+    result.write_through_writes += 1;
+
+  if (r1.set_result.has_eviction && r1.set_result.evicted_dirty)
+    writeback_l1_victim_to_l2(result, l2_.level, l2_.write_policy,
+                              l2_.write_allocate, l2_.delay_cycles,
+                              r1.evicted_cache_line, mem_delay_);
+
   auto r2 = l2_.level.access(
     cache_line, options_for(l2_store, l2_.write_policy, l2_.write_allocate));
+  result.delay_cycles += static_cast<uint64_t>(l2_.delay_cycles);
+  result.miss_level = r2.hit ? 1 : 2;
+  record_dirty_l2_eviction(result, r2.set_result, mem_delay_);
   if (r2.hit)
   {
-    return {static_cast<uint64_t>(l1e.delay_cycles + l2_.delay_cycles), 1};
+    return result;
   }
 
-  return {
-    static_cast<uint64_t>(l1e.delay_cycles + l2_.delay_cycles + mem_delay_), 2};
+  result.delay_cycles += static_cast<uint64_t>(mem_delay_);
+  return result;
 }

@@ -87,6 +87,23 @@ TEST(CsvWriter, extended_summary_contains_access_level_and_cycle_columns)
   EXPECT_NE(out.find("memory_accesses"), std::string::npos);
   EXPECT_NE(out.find("total_cycles"), std::string::npos);
   EXPECT_NE(out.find("average_cycles_per_access"), std::string::npos);
+  EXPECT_NE(out.find("write_through_writes"), std::string::npos);
+  EXPECT_NE(out.find("writebacks"), std::string::npos);
+  EXPECT_NE(out.find("dirty_evictions"), std::string::npos);
+  EXPECT_NE(out.find("writeback_cycles"), std::string::npos);
+}
+
+TEST(CsvWriter, extended_summary_writes_write_traffic_values)
+{
+  apex::MissStats miss;
+  apex::SimulationStats cache;
+  cache.record_access("A", "store", 0, 16, 3, 2, 1, 24);
+
+  std::ostringstream oss;
+  apex::CsvWriter::write_summary(oss, miss, cache);
+  std::string out = oss.str();
+
+  EXPECT_NE(out.find(",3,2,1,24\n"), std::string::npos);
 }
 
 TEST(CsvWriter, object_breakdown_contains_accesses_hits_misses_and_rate)

@@ -17,6 +17,10 @@ TEST(SimulationStats, default_stats_are_zero)
   EXPECT_EQ(stats.l2_misses, 0u);
   EXPECT_EQ(stats.memory_accesses, 0u);
   EXPECT_EQ(stats.total_cycles, 0u);
+  EXPECT_EQ(stats.write_through_writes, 0u);
+  EXPECT_EQ(stats.writebacks, 0u);
+  EXPECT_EQ(stats.dirty_evictions, 0u);
+  EXPECT_EQ(stats.writeback_cycles, 0u);
   EXPECT_DOUBLE_EQ(stats.average_cycles_per_access(), 0.0);
 }
 
@@ -93,4 +97,16 @@ TEST(SimulationStats, separates_object_load_and_store_counts)
   EXPECT_EQ(object.store_accesses, 1u);
   EXPECT_EQ(object.load_misses, 0u);
   EXPECT_EQ(object.store_misses, 1u);
+}
+
+TEST(SimulationStats, records_write_traffic)
+{
+  SimulationStats stats;
+
+  stats.record_access("A", "store", 0, 16, 1, 2, 3, 24);
+
+  EXPECT_EQ(stats.write_through_writes, 1u);
+  EXPECT_EQ(stats.writebacks, 2u);
+  EXPECT_EQ(stats.dirty_evictions, 3u);
+  EXPECT_EQ(stats.writeback_cycles, 24u);
 }

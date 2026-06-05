@@ -153,6 +153,19 @@ std::string RunLogger::format(const RunLogContext & context, RunLogMode mode,
   os << "  " << label("store:", color_enabled) << "    "
      << number(context.miss_stats.store, "35", color_enabled) << "\n\n";
 
+  os << heading("Write traffic", color_enabled) << '\n';
+  os << "  " << label("write-through:", color_enabled) << ' '
+     << number(context.cache_stats.write_through_writes, "35", color_enabled)
+     << '\n';
+  os << "  " << label("writebacks:", color_enabled) << "    "
+     << number(context.cache_stats.writebacks, "33", color_enabled) << '\n';
+  os << "  " << label("dirty evict:", color_enabled) << "   "
+     << number(context.cache_stats.dirty_evictions, "31", color_enabled)
+     << '\n';
+  os << "  " << label("wb cycles:", color_enabled) << "     "
+     << number(context.cache_stats.writeback_cycles, "36", color_enabled)
+     << "\n\n";
+
   std::vector<std::pair<std::string, ObjectAccessStats>> objects(
     context.cache_stats.objects.begin(), context.cache_stats.objects.end());
   std::sort(objects.begin(), objects.end(), [](const auto & lhs,

@@ -10,6 +10,10 @@ struct HierarchyAccessResult
 {
   uint64_t delay_cycles;
   int miss_level;  // 0 = L1 hit, 1 = L2 hit, 2 = memory
+  uint64_t write_through_writes = 0;
+  uint64_t writebacks = 0;
+  uint64_t dirty_evictions = 0;
+  uint64_t writeback_cycles = 0;
 };
 
 /**

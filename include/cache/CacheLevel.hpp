@@ -8,6 +8,7 @@ struct LevelAccessResult
 {
   bool hit;
   SetAccessResult set_result;
+  uint64_t evicted_cache_line = 0;
 };
 
 /**

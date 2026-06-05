@@ -19,7 +19,10 @@ LevelAccessResult CacheLevel::access(uint64_t cache_line,
   uint64_t si = set_index_of(cache_line, num_sets_);
   uint64_t tag = tag_of(cache_line, num_sets_);
   auto sr = sets_[si].access(tag, options);
-  return {sr.hit, sr};
+  uint64_t evicted_cache_line = 0;
+  if (sr.has_eviction)
+    evicted_cache_line = sr.evicted_tag * static_cast<uint64_t>(num_sets_) + si;
+  return {sr.hit, sr, evicted_cache_line};
 }
 
 uint64_t CacheLevel::set_index_of(uint64_t cache_line, int num_sets)
