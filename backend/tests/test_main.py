@@ -17,6 +17,12 @@ def _write_summary_json(path):
             "Memory": {"accesses": 2},
         },
         "cycles": {"total": 200, "average_per_access": 2.0},
+        "write_traffic": {
+            "write_through_writes": 20,
+            "writebacks": 1,
+            "dirty_evictions": 1,
+            "writeback_cycles": 40,
+        },
     }))
 
 
@@ -27,7 +33,7 @@ def _write_objects_csv(path):
     )
 
 
-def test_generate_writes_three_prefixed_plots_for_summary_file(tmp_path):
+def test_generate_writes_four_prefixed_plots_for_summary_file(tmp_path):
     _write_summary_json(tmp_path / "bench_ape.json")
     _write_objects_csv(tmp_path / "bench_ape_objects.csv")
     out = tmp_path / "plots"
@@ -38,6 +44,7 @@ def test_generate_writes_three_prefixed_plots_for_summary_file(tmp_path):
         "bench_ape_miss_breakdown.png",
         "bench_ape_object_misses.png",
         "bench_ape_cache_hit_miss.png",
+        "bench_ape_write_traffic.png",
     ]
     assert all(p.exists() for p in saved)
 
@@ -54,8 +61,10 @@ def test_generate_writes_prefixed_plots_for_each_report_pair(tmp_path):
         "a_ape_miss_breakdown.png",
         "a_ape_object_misses.png",
         "a_ape_cache_hit_miss.png",
+        "a_ape_write_traffic.png",
         "b_ape_miss_breakdown.png",
         "b_ape_object_misses.png",
         "b_ape_cache_hit_miss.png",
+        "b_ape_write_traffic.png",
     ]
     assert all(p.exists() for p in saved)

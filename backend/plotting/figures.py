@@ -8,6 +8,7 @@ from backend import reports
 from backend.plotting import bars, style
 
 _MISS_COLORS = {"cold": "#55A868", "capacity": "#4C72B0", "conflict": "#C44E52"}
+_WRITE_COLORS = ("#4C72B0", "#DD8452", "#55A868", "#8172B3")
 
 
 def figure_miss_breakdown(summary: dict):
@@ -61,9 +62,10 @@ def _grouped_figure(labels, series, *, title, ylabel, xlabel,
         ax.set_ylabel(ylabel, labelpad=8)
         ax.set_xlabel(xlabel)
         ax.set_title(title, fontsize=13, pad=14)
-        ax.legend(frameon=False, fontsize=9)
+        ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0),
+                  frameon=False, fontsize=9)
         bars.style_bars(ax, labels, rotate=rotate)
-        fig.subplots_adjust(left=0.15, right=0.97, bottom=0.30, top=0.84)
+        fig.subplots_adjust(left=0.15, right=0.78, bottom=0.30, top=0.84)
         return fig
 
     low_max, high_min = limits
@@ -82,12 +84,13 @@ def _grouped_figure(labels, series, *, title, ylabel, xlabel,
     ax_top.tick_params(labelbottom=False, bottom=False)
     ax_top.set_ylabel(ylabel, labelpad=12)
     ax_top.set_title(title, fontsize=13, pad=14)
-    ax_top.legend(frameon=False, fontsize=9)
+    ax_top.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0),
+                  frameon=False, fontsize=9)
     bars.style_bars(ax_bot, labels, rotate=rotate)
     ax_bot.set_xlabel(xlabel)
     sns.despine(ax=ax_top)
     bars.add_break_marks(ax_top, ax_bot)
-    fig.subplots_adjust(left=0.15, right=0.97, bottom=0.30, top=0.84, hspace=0.0)
+    fig.subplots_adjust(left=0.15, right=0.78, bottom=0.30, top=0.84, hspace=0.0)
     bars.add_break_band(ax_top, ax_bot)
     return fig
 
@@ -115,3 +118,27 @@ def figure_hit_miss(summary: dict):
     ]
     return _grouped_figure(labels, series, ylabel="Ratio", xlabel="Cache level",
                            title="Cache hit/miss rate", ymax=1.0, percent=True)
+
+
+def figure_write_traffic(summary: dict):
+    """write-through/writeback traffic figure를 만든다."""
+    import matplotlib.pyplot as plt
+
+    traffic = reports.write_traffic(summary)
+    labels = list(traffic)
+    values = [traffic[k] for k in labels]
+    top = max(values + [1])
+    fig, ax = plt.subplots(figsize=(4.8, 3.4))
+    rects = ax.bar(range(len(labels)), values, color=_WRITE_COLORS,
+                   edgecolor="black", linewidth=0.5, width=0.68)
+    ax.set_ylim(0, top * 1.18)
+    for rect, value in zip(rects, values):
+        cx = rect.get_x() + rect.get_width() / 2
+        ax.text(cx, rect.get_height() + top * 0.02, str(value),
+                ha="center", va="bottom", fontsize=7, clip_on=False)
+    ax.set_ylabel("Count / cycles", labelpad=8)
+    ax.set_xlabel("Write event")
+    ax.set_title("Write traffic", fontsize=13, pad=14)
+    bars.style_bars(ax, labels, rotate=True)
+    fig.subplots_adjust(left=0.16, right=0.97, bottom=0.30, top=0.84)
+    return fig

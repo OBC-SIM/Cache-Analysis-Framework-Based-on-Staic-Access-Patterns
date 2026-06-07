@@ -1,9 +1,10 @@
 """APEX-Cache 리포트 시각화 CLI.
 
-`run --output <dir>`이 만든 리포트를 읽어 PNG 3종을 생성한다:
+`run --output <dir>`이 만든 리포트를 읽어 PNG 4종을 생성한다:
   miss_breakdown.png  — cold/capacity/conflict miss 수
   object_misses.png   — 객체별 load/store miss (상위 N; 격차 크면 broken axis)
   cache_hit_miss.png  — L1/L2 hit/miss 비율 (격차 크면 broken axis)
+  write_traffic.png   — write-through/writeback/dirty eviction 통계
 
 사용법 (저장소 루트에서):
   python3 backend/main.py results/ [--output results/plots] [--top 10]
@@ -23,7 +24,7 @@ from backend.plotting import figures, style  # noqa: E402
 
 
 def generate(input_path, output_dir=None, top_n: int = 10) -> list:
-    """리포트를 읽어 PNG 3종을 생성하고 저장 경로 목록을 반환한다."""
+    """리포트를 읽어 PNG 4종을 생성하고 저장 경로 목록을 반환한다."""
     os.environ.setdefault("MPLBACKEND", "Agg")
     os.environ.setdefault("MPLCONFIGDIR", "/tmp/apex-cache-matplotlib")
     Path(os.environ["MPLCONFIGDIR"]).mkdir(parents=True, exist_ok=True)
@@ -44,6 +45,7 @@ def generate(input_path, output_dir=None, top_n: int = 10) -> list:
             ("object_misses",
              lambda: figures.figure_object_misses(objects, top_n)),
             ("cache_hit_miss", lambda: figures.figure_hit_miss(summary)),
+            ("write_traffic", lambda: figures.figure_write_traffic(summary)),
         )
         for name, make_fig in plots:
             fig = make_fig()

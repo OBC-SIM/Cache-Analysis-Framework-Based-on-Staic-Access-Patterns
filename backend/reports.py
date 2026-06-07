@@ -11,6 +11,12 @@ from pathlib import Path
 from typing import Tuple
 
 _INT_FIELDS = ("accesses", "hits", "misses", "load_misses", "store_misses")
+_WRITE_TRAFFIC_FIELDS = (
+    ("write-through", "write_through_writes"),
+    ("writebacks", "writebacks"),
+    ("dirty evict", "dirty_evictions"),
+    ("wb cycles", "writeback_cycles"),
+)
 
 
 @dataclass(frozen=True)
@@ -93,6 +99,13 @@ def hit_miss_rates(summary: dict) -> dict:
         hit = levels[name]["hit_rate"]
         out[name] = {"hit": hit, "miss": 1.0 - hit}
     return out
+
+
+def write_traffic(summary: dict) -> dict:
+    """write-side traffic counters를 plotting label 기준으로 반환한다."""
+    traffic = summary.get("write_traffic", {})
+    return {label: int(traffic.get(key, 0))
+            for label, key in _WRITE_TRAFFIC_FIELDS}
 
 
 def top_objects_by_misses(objects: list, n: int = 10) -> list:

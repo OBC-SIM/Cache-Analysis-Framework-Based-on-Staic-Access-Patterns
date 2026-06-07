@@ -30,6 +30,12 @@ def _write_summary_json(path):
             "Memory": {"accesses": 3875},
         },
         "cycles": {"total": 5485024, "average_per_access": 4.551},
+        "write_traffic": {
+            "write_through_writes": 305200,
+            "writebacks": 12,
+            "dirty_evictions": 12,
+            "writeback_cycles": 480,
+        },
     }))
 
 
@@ -73,6 +79,27 @@ def test_hit_miss_rates_splits_each_level(tmp_path):
     assert hm["L1"]["hit"] == 0.986
     assert abs(hm["L1"]["miss"] - 0.014) < 1e-9  # 1 - hit
     assert abs(hm["L2"]["miss"] - 0.233) < 1e-9
+
+
+def test_write_traffic_extracts_summary_values(tmp_path):
+    p = tmp_path / "x.json"
+    _write_summary_json(p)
+    s = reports.load_summary(p)
+    assert reports.write_traffic(s) == {
+        "write-through": 305200,
+        "writebacks": 12,
+        "dirty evict": 12,
+        "wb cycles": 480,
+    }
+
+
+def test_write_traffic_defaults_missing_fields_to_zero():
+    assert reports.write_traffic({}) == {
+        "write-through": 0,
+        "writebacks": 0,
+        "dirty evict": 0,
+        "wb cycles": 0,
+    }
 
 
 def test_find_reports_locates_summary_and_objects(tmp_path):
