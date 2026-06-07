@@ -88,6 +88,30 @@ ctest --test-dir build
 예를 들어 `examples/test_stencil_g_ape.json`은 `test_stencil_ape.*` 리포트로
 저장된다.
 
+### C 소스부터 실행
+
+`apex-cache run`은 APE JSON을 입력으로 받는다. C/LLVM IR 입력에서 APE JSON 생성과
+cache simulation을 한 번에 실행하려면 루트의 `pipeline.py` wrapper를 사용한다.
+
+```bash
+python3 pipeline.py frontend/tasks/test_matmul.c \
+  --cache settings/cache.yaml \
+  --output results \
+  --no-color
+```
+
+동작 흐름:
+
+```text
+C/LL -> clang-14 -> opt-14 APE JSON -> apex-cache run -> reports
+```
+
+APE JSON까지만 생성하려면 `--ape-only`를 사용한다.
+
+```bash
+python3 pipeline.py frontend/tasks/test_matmul.c --ape-only
+```
+
 ### CLI 옵션
 
 | 옵션 | 설명 |
