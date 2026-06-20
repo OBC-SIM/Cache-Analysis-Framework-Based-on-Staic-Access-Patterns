@@ -1,5 +1,8 @@
 #include "ap/EventBuilder.hpp"
 
+#include <algorithm>
+#include <cctype>
+#include <stdexcept>
 #include <unordered_map>
 #include <variant>
 
@@ -8,10 +11,45 @@
 
 namespace apex
 {
+namespace
+{
+
+int64_t eval_bound_index(
+  const std::string & expr, const std::vector<LoopFrame> & loop_stack,
+  const std::unordered_map<std::string, int64_t> & bindings)
+{
+  bool identifier = !expr.empty();
+  for (char c : expr)
+    if (!std::isalnum(static_cast<unsigned char>(c)) && c != '_')
+      identifier = false;
+  if (identifier)
+  {
+    for (auto it = loop_stack.rbegin(); it != loop_stack.rend(); ++it)
+      if (it->var == expr) return it->iter;
+    auto bound = bindings.find(expr);
+    if (bound != bindings.end()) return bound->second;
+  }
+
+  std::unordered_map<std::string, int64_t> vars;
+  for (const auto & frame : loop_stack) vars[frame.var] = frame.iter;
+  for (const auto & binding : bindings) vars[binding.first] = binding.second;
+  return eval_index(expr, vars);
+}
+
+}  // namespace
 
 std::vector<AccessEvent> EventBuilder::build_program(const ApProgram & program)
 {
   std::vector<AccessEvent> out;
+  visit_program(program, [&](AccessEvent && event) {
+    out.push_back(std::move(event));
+  });
+  return out;
+}
+
+void EventBuilder::visit_program(const ApProgram & program,
+                                 const EventSink & sink)
+{
   std::vector<LoopFrame> loop_stack;
   uint64_t seq = 0;
   const std::unordered_map<std::string, int64_t> no_bindings;
@@ -21,13 +59,12 @@ std::vector<AccessEvent> EventBuilder::build_program(const ApProgram & program)
     auto it = program.functions.find(root);
     if (it == program.functions.end()) continue;
     for (const auto & n : it->second)
-      visit_v2(*n, program, out, loop_stack, root, seq, no_bindings, no_subst);
+      visit_v2(*n, program, sink, loop_stack, root, seq, no_bindings, no_subst);
   }
-  return out;
 }
 
 void EventBuilder::visit_v2(
-  const ApNode & node, const ApProgram & program, std::vector<AccessEvent> & out,
+  const ApNode & node, const ApProgram & program, const EventSink & sink,
   std::vector<LoopFrame> & loop_stack, const std::string & region_path,
   uint64_t & seq, const std::unordered_map<std::string, int64_t> & bindings,
   const std::unordered_map<std::string, std::string> & obj_subst)
@@ -47,42 +84,58 @@ void EventBuilder::visit_v2(
       e.region_path = region_path;
       e.op = s.op;
       e.object_name = resolve_object(s.object);
-      e.loop_stack = loop_stack;
-      out.push_back(std::move(e));
+      sink(std::move(e));
       break;
     }
 
     case ApNodeKind::Array: {
       const auto & a = static_cast<const ArrayNode &>(node);
-
-      std::unordered_map<std::string, int64_t> vars;
-      for (const auto & f : loop_stack) vars[f.var] = f.iter;
-      for (const auto & b : bindings) vars[b.first] = b.second;  // param 바인딩
-
-      std::vector<AccessStep> path;
-      path.reserve(a.access_path.size());
-      for (const auto & rs : a.access_path)
-      {
-        if (std::holds_alternative<RawIndexStep>(rs))
-          path.push_back(
-            IndexStep{eval_index(std::get<RawIndexStep>(rs).expr, vars)});
-        else
-          path.push_back(std::get<FieldStep>(rs));
-      }
-
       const std::string object = resolve_object(a.object);
-      ObjectLayout obj;
       auto it = program.objects.find(object);
-      if (it != program.objects.end()) obj = it->second;
+      const ObjectLayout empty;
+      const ObjectLayout & obj =
+        it != program.objects.end() ? it->second : empty;
+
+      int64_t byte_offset = 0;
+      const bool index_only = std::all_of(
+        a.access_path.begin(), a.access_path.end(),
+        [](const RawAccessStep & step) {
+          return std::holds_alternative<RawIndexStep>(step);
+        });
+      if (index_only)
+      {
+        int64_t stride = obj.elem_size;
+        int shape_index = static_cast<int>(obj.shape.size());
+        for (std::size_t p = a.access_path.size(); p-- > 0;)
+        {
+          const auto & raw = std::get<RawIndexStep>(a.access_path[p]);
+          byte_offset += eval_bound_index(raw.expr, loop_stack, bindings) *
+                         stride;
+          --shape_index;
+          if (shape_index >= 0)
+            stride *= obj.shape[static_cast<std::size_t>(shape_index)];
+        }
+      }
+      else
+      {
+        std::vector<AccessStep> path;
+        path.reserve(a.access_path.size());
+        for (const auto & raw : a.access_path)
+          if (std::holds_alternative<RawIndexStep>(raw))
+            path.push_back(IndexStep{eval_bound_index(
+              std::get<RawIndexStep>(raw).expr, loop_stack, bindings)});
+          else
+            path.push_back(std::get<FieldStep>(raw));
+        byte_offset = resolve_offset(obj, path, program.structs);
+      }
 
       AccessEvent e;
       e.sequence_id = seq++;
       e.region_path = region_path;
       e.op = a.op;
       e.object_name = object;
-      e.byte_offset = resolve_offset(obj, path, program.structs);
-      e.loop_stack = loop_stack;
-      out.push_back(std::move(e));
+      e.byte_offset = byte_offset;
+      sink(std::move(e));
       break;
     }
 
@@ -92,7 +145,7 @@ void EventBuilder::visit_v2(
       {
         loop_stack.push_back({l.var, iter});
         for (const auto & child : l.body)
-          visit_v2(*child, program, out, loop_stack, region_path, seq, bindings,
+          visit_v2(*child, program, sink, loop_stack, region_path, seq, bindings,
                    obj_subst);
         loop_stack.pop_back();
       }
@@ -131,7 +184,7 @@ void EventBuilder::visit_v2(
       const std::string path =
         region_path.empty() ? c.callee : region_path + "/" + c.callee;
       for (const auto & child : fit->second)
-        visit_v2(*child, program, out, loop_stack, path, seq, callee_bindings,
+        visit_v2(*child, program, sink, loop_stack, path, seq, callee_bindings,
                  callee_subst);
       break;
     }

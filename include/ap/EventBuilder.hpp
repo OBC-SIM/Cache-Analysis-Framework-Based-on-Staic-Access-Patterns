@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -10,6 +11,8 @@
 
 namespace apex
 {
+
+using EventSink = std::function<void(AccessEvent &&)>;
 
 /**
  * @brief LAT v2 ApProgram을 선형 AccessEvent 스트림으로 변환한다.
@@ -31,13 +34,20 @@ public:
    */
   std::vector<AccessEvent> build_program(const ApProgram & program);
 
+  /**
+   * @brief ApProgram에서 생성한 event를 순서대로 sink에 전달한다.
+   * @param program 파싱된 ApProgram
+   * @param sink 각 event의 소유권을 즉시 전달받는 consumer
+   */
+  void visit_program(const ApProgram & program, const EventSink & sink);
+
 private:
   /**
    * @param bindings  callee param 변수 이름 → 바인딩된 정수 값 (index 평가에 합류)
    * @param obj_subst callee param object id → 호출자 인자 object id (접근 객체 치환)
    */
   void visit_v2(const ApNode & node, const ApProgram & program,
-                std::vector<AccessEvent> & out,
+                const EventSink & sink,
                 std::vector<LoopFrame> & loop_stack,
                 const std::string & region_path, uint64_t & seq,
                 const std::unordered_map<std::string, int64_t> & bindings,

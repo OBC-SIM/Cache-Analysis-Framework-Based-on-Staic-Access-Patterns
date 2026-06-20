@@ -1,28 +1,10 @@
 #pragma once
-#include <vector>
-
-#include "analysis/Attribution.hpp"
-#include "analysis/Diagnostics.hpp"  // MissStats
-#include "analysis/SimulationStats.hpp"
-#include "ap/AccessEvent.hpp"
 #include "ap/ApProgram.hpp"
 #include "cache/CacheConfig.hpp"
+#include "pipeline/PipelineResult.hpp"
 
 namespace apex
 {
-
-/**
- * @brief 전체 분석 파이프라인의 결과.
- *
- * stats는 Report Writer가 소비하는 miss 유형·op·object 집계,
- * attribution은 region inclusive/exclusive 등 세부 귀속.
- */
-struct PipelineResult
-{
-  MissStats stats;
-  SimulationStats cache_stats;
-  Attribution attribution;
-};
 
 /**
  * @brief LAT v2 ApProgram을 받아 메모리 배치 → 캐시 시뮬레이션 → miss 귀속까지
@@ -49,9 +31,6 @@ public:
 
 private:
   HierarchyConfig config_;
-
-  /// cache_line이 채워진 이벤트 스트림을 시뮬레이션해 miss를 분류·귀속한다.
-  PipelineResult simulate(const std::vector<AccessEvent> & events);
 };
 
 }  // namespace apex

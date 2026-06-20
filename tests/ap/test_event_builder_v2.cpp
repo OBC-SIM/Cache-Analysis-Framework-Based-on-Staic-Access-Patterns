@@ -132,6 +132,19 @@ TEST(EventBuilderV2, op_preserved)
   EXPECT_EQ(events(kArr1d)[0].op, "store");
 }
 
+TEST(EventBuilderV2, streaming_sink_receives_events_in_program_order)
+{
+  ApProgram program = ApLoader{}.load_program_string(kArr1d);
+  std::vector<int64_t> offsets;
+  EventBuilder{}.visit_program(program, [&](AccessEvent && event) {
+    offsets.push_back(event.byte_offset);
+  });
+
+  ASSERT_EQ(offsets.size(), 100u);
+  EXPECT_EQ(offsets.front(), 0);
+  EXPECT_EQ(offsets.back(), 396);
+}
+
 TEST(EventBuilderV2, nested_loop_produces_product_of_bounds)
 {
   EXPECT_EQ(events(kArr2d).size(), 64u);  // 8 * 8
