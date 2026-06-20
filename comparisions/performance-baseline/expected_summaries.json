@@ -1,0 +1,1202 @@
+{
+  "polybench_2mm": {
+    "accesses": {
+      "load": 900000,
+      "store": 305200,
+      "total": 1205200
+    },
+    "capacity": 6976,
+    "cold": 3875,
+    "conflict": 2809,
+    "cycles": {
+      "average_per_access": 1.2525721871888482,
+      "total": 1509600
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9886657816130103,
+        "hits": 1191540,
+        "misses": 13660
+      },
+      "L2": {
+        "hit_rate": 0.7163250366032211,
+        "hits": 9785,
+        "misses": 3875
+      },
+      "Memory": {
+        "accesses": 3875
+      }
+    },
+    "load": 12360,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 6976,
+        "cold": 3875,
+        "conflict": 2809,
+        "policy": 0
+      },
+      "operation": {
+        "load": 12360,
+        "store": 1300
+      }
+    },
+    "policy": 0,
+    "store": 1300,
+    "write_traffic": {
+      "dirty_evictions": 1280,
+      "write_through_writes": 0,
+      "writeback_cycles": 12800,
+      "writebacks": 1280
+    }
+  },
+  "polybench_atax": {
+    "accesses": {
+      "load": 63000,
+      "store": 21220,
+      "total": 84220
+    },
+    "capacity": 0,
+    "cold": 2699,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 2.605081928283068,
+      "total": 219400
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9679529802897174,
+        "hits": 81521,
+        "misses": 2699
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 2699
+      },
+      "Memory": {
+        "accesses": 2699
+      }
+    },
+    "load": 2643,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 2699,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 2643,
+        "store": 56
+      }
+    },
+    "policy": 0,
+    "store": 56,
+    "write_traffic": {
+      "dirty_evictions": 23,
+      "write_through_writes": 0,
+      "writeback_cycles": 230,
+      "writebacks": 23
+    }
+  },
+  "polybench_correlation": {
+    "accesses": {
+      "load": 65250,
+      "store": 23150,
+      "total": 88400
+    },
+    "capacity": 0,
+    "cold": 359,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 1.2030542986425339,
+      "total": 106350
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9959389140271493,
+        "hits": 88041,
+        "misses": 359
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 359
+      },
+      "Memory": {
+        "accesses": 359
+      }
+    },
+    "load": 188,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 359,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 188,
+        "store": 171
+      }
+    },
+    "policy": 0,
+    "store": 171,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "polybench_gemm": {
+    "accesses": {
+      "load": 24400,
+      "store": 8400,
+      "total": 32800
+    },
+    "capacity": 0,
+    "cold": 300,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 1.4573170731707317,
+      "total": 47800
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9908536585365854,
+        "hits": 32500,
+        "misses": 300
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 300
+      },
+      "Memory": {
+        "accesses": 300
+      }
+    },
+    "load": 300,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 300,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 300,
+        "store": 0
+      }
+    },
+    "policy": 0,
+    "store": 0,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "polybench_jacobi": {
+    "accesses": {
+      "load": 72200,
+      "store": 14440,
+      "total": 86640
+    },
+    "capacity": 0,
+    "cold": 800,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 1.4616805170821792,
+      "total": 126640
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9907663896583564,
+        "hits": 85840,
+        "misses": 800
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 800
+      },
+      "Memory": {
+        "accesses": 800
+      }
+    },
+    "load": 420,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 800,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 420,
+        "store": 380
+      }
+    },
+    "policy": 0,
+    "store": 380,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_1d": {
+    "accesses": {
+      "load": 0,
+      "store": 100,
+      "total": 100
+    },
+    "capacity": 0,
+    "cold": 13,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 7.5,
+      "total": 750
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.87,
+        "hits": 87,
+        "misses": 13
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 13
+      },
+      "Memory": {
+        "accesses": 13
+      }
+    },
+    "load": 0,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 13,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 0,
+        "store": 13
+      }
+    },
+    "policy": 0,
+    "store": 13,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_2d": {
+    "accesses": {
+      "load": 4096,
+      "store": 4096,
+      "total": 8192
+    },
+    "capacity": 0,
+    "cold": 512,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 4.125,
+      "total": 33792
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9375,
+        "hits": 7680,
+        "misses": 512
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 512
+      },
+      "Memory": {
+        "accesses": 512
+      }
+    },
+    "load": 512,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 512,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 512,
+        "store": 0
+      }
+    },
+    "policy": 0,
+    "store": 0,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_2steps": {
+    "accesses": {
+      "load": 0,
+      "store": 100,
+      "total": 100
+    },
+    "capacity": 0,
+    "cold": 13,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 7.5,
+      "total": 750
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.87,
+        "hits": 87,
+        "misses": 13
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 13
+      },
+      "Memory": {
+        "accesses": 13
+      }
+    },
+    "load": 0,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 13,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 0,
+        "store": 13
+      }
+    },
+    "policy": 0,
+    "store": 13,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_call": {
+    "accesses": {
+      "load": 16,
+      "store": 16,
+      "total": 32
+    },
+    "capacity": 0,
+    "cold": 2,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 4.125,
+      "total": 132
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9375,
+        "hits": 30,
+        "misses": 2
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 2
+      },
+      "Memory": {
+        "accesses": 2
+      }
+    },
+    "load": 2,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 2,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 2,
+        "store": 0
+      }
+    },
+    "policy": 0,
+    "store": 0,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_constant_access": {
+    "accesses": {
+      "load": 0,
+      "store": 8,
+      "total": 8
+    },
+    "capacity": 0,
+    "cold": 1,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 7.25,
+      "total": 58
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.875,
+        "hits": 7,
+        "misses": 1
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 1
+      },
+      "Memory": {
+        "accesses": 1
+      }
+    },
+    "load": 0,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 1,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 0,
+        "store": 1
+      }
+    },
+    "policy": 0,
+    "store": 1,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_constant_access2": {
+    "accesses": {
+      "load": 0,
+      "store": 8,
+      "total": 8
+    },
+    "capacity": 0,
+    "cold": 1,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 7.25,
+      "total": 58
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.875,
+        "hits": 7,
+        "misses": 1
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 1
+      },
+      "Memory": {
+        "accesses": 1
+      }
+    },
+    "load": 0,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 1,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 0,
+        "store": 1
+      }
+    },
+    "policy": 0,
+    "store": 1,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_constant_variable": {
+    "accesses": {
+      "load": 0,
+      "store": 50,
+      "total": 50
+    },
+    "capacity": 0,
+    "cold": 7,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 8.0,
+      "total": 400
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.86,
+        "hits": 43,
+        "misses": 7
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 7
+      },
+      "Memory": {
+        "accesses": 7
+      }
+    },
+    "load": 0,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 7,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 0,
+        "store": 7
+      }
+    },
+    "policy": 0,
+    "store": 7,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_global": {
+    "accesses": {
+      "load": 20000,
+      "store": 20000,
+      "total": 40000
+    },
+    "capacity": 0,
+    "cold": 5000,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 7.747,
+      "total": 309880
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.875,
+        "hits": 35000,
+        "misses": 5000
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 5000
+      },
+      "Memory": {
+        "accesses": 5000
+      }
+    },
+    "load": 2500,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 5000,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 2500,
+        "store": 2500
+      }
+    },
+    "policy": 0,
+    "store": 2500,
+    "write_traffic": {
+      "dirty_evictions": 1988,
+      "write_through_writes": 0,
+      "writeback_cycles": 19880,
+      "writebacks": 1988
+    }
+  },
+  "test_local": {
+    "accesses": {
+      "load": 4096,
+      "store": 4096,
+      "total": 8192
+    },
+    "capacity": 0,
+    "cold": 1024,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 7.25,
+      "total": 59392
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.875,
+        "hits": 7168,
+        "misses": 1024
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 1024
+      },
+      "Memory": {
+        "accesses": 1024
+      }
+    },
+    "load": 512,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 1024,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 512,
+        "store": 512
+      }
+    },
+    "policy": 0,
+    "store": 512,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_matmul": {
+    "accesses": {
+      "load": 1572864,
+      "store": 524288,
+      "total": 2097152
+    },
+    "capacity": 61440,
+    "cold": 4864,
+    "conflict": 460934,
+    "cycles": {
+      "average_per_access": 3.609128952026367,
+      "total": 7568892
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.7485933303833008,
+        "hits": 1569914,
+        "misses": 527238
+      },
+      "L2": {
+        "hit_rate": 0.9907745648075442,
+        "hits": 522374,
+        "misses": 4864
+      },
+      "Memory": {
+        "accesses": 4864
+      }
+    },
+    "load": 527238,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 61440,
+        "cold": 4864,
+        "conflict": 460934,
+        "policy": 0
+      },
+      "operation": {
+        "load": 527238,
+        "store": 0
+      }
+    },
+    "policy": 0,
+    "store": 0,
+    "write_traffic": {
+      "dirty_evictions": 480,
+      "write_through_writes": 0,
+      "writeback_cycles": 4800,
+      "writebacks": 480
+    }
+  },
+  "test_matmul_cache_friendly": {
+    "accesses": {
+      "load": 1572864,
+      "store": 524288,
+      "total": 2097152
+    },
+    "capacity": 61440,
+    "cold": 4864,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 1.411224365234375,
+      "total": 2959552
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9683837890625,
+        "hits": 2030848,
+        "misses": 66304
+      },
+      "L2": {
+        "hit_rate": 0.9266409266409267,
+        "hits": 61440,
+        "misses": 4864
+      },
+      "Memory": {
+        "accesses": 4864
+      }
+    },
+    "load": 66304,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 61440,
+        "cold": 4864,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 66304,
+        "store": 0
+      }
+    },
+    "policy": 0,
+    "store": 0,
+    "write_traffic": {
+      "dirty_evictions": 480,
+      "write_through_writes": 0,
+      "writeback_cycles": 4800,
+      "writebacks": 480
+    }
+  },
+  "test_matmul_params": {
+    "accesses": {
+      "load": 196608,
+      "store": 65536,
+      "total": 262144
+    },
+    "capacity": 0,
+    "cold": 640,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 1.1220703125,
+      "total": 294144
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.99755859375,
+        "hits": 261504,
+        "misses": 640
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 640
+      },
+      "Memory": {
+        "accesses": 640
+      }
+    },
+    "load": 640,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 640,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 640,
+        "store": 0
+      }
+    },
+    "policy": 0,
+    "store": 0,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_mixed_global_param": {
+    "accesses": {
+      "load": 1024,
+      "store": 512,
+      "total": 1536
+    },
+    "capacity": 0,
+    "cold": 128,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 5.166666666666667,
+      "total": 7936
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9166666666666666,
+        "hits": 1408,
+        "misses": 128
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 128
+      },
+      "Memory": {
+        "accesses": 128
+      }
+    },
+    "load": 128,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 128,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 128,
+        "store": 0
+      }
+    },
+    "policy": 0,
+    "store": 0,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_multi": {
+    "accesses": {
+      "load": 576,
+      "store": 320,
+      "total": 896
+    },
+    "capacity": 0,
+    "cold": 72,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 5.017857142857143,
+      "total": 4496
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9196428571428571,
+        "hits": 824,
+        "misses": 72
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 72
+      },
+      "Memory": {
+        "accesses": 72
+      }
+    },
+    "load": 72,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 72,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 72,
+        "store": 0
+      }
+    },
+    "policy": 0,
+    "store": 0,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_ptr_param": {
+    "accesses": {
+      "load": 0,
+      "store": 54,
+      "total": 54
+    },
+    "capacity": 0,
+    "cold": 9,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 9.333333333333334,
+      "total": 504
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.8333333333333334,
+        "hits": 45,
+        "misses": 9
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 9
+      },
+      "Memory": {
+        "accesses": 9
+      }
+    },
+    "load": 0,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 9,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 0,
+        "store": 9
+      }
+    },
+    "policy": 0,
+    "store": 9,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_regular_block": {
+    "accesses": {
+      "load": 98,
+      "store": 100,
+      "total": 198
+    },
+    "capacity": 0,
+    "cold": 14,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 4.5353535353535355,
+      "total": 898
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9292929292929293,
+        "hits": 184,
+        "misses": 14
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 14
+      },
+      "Memory": {
+        "accesses": 14
+      }
+    },
+    "load": 12,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 14,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 12,
+        "store": 2
+      }
+    },
+    "policy": 0,
+    "store": 2,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_stencil": {
+    "accesses": {
+      "load": 294,
+      "store": 98,
+      "total": 392
+    },
+    "capacity": 0,
+    "cold": 26,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 4.316326530612245,
+      "total": 1692
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.9336734693877551,
+        "hits": 366,
+        "misses": 26
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 26
+      },
+      "Memory": {
+        "accesses": 26
+      }
+    },
+    "load": 13,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 26,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 13,
+        "store": 13
+      }
+    },
+    "policy": 0,
+    "store": 13,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_struct": {
+    "accesses": {
+      "load": 0,
+      "store": 8,
+      "total": 8
+    },
+    "capacity": 0,
+    "cold": 3,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 19.75,
+      "total": 158
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.625,
+        "hits": 5,
+        "misses": 3
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 3
+      },
+      "Memory": {
+        "accesses": 3
+      }
+    },
+    "load": 0,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 3,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 0,
+        "store": 3
+      }
+    },
+    "policy": 0,
+    "store": 3,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  },
+  "test_unnamed_param": {
+    "accesses": {
+      "load": 0,
+      "store": 0,
+      "total": 0
+    },
+    "capacity": 0,
+    "cold": 0,
+    "conflict": 0,
+    "cycles": {
+      "average_per_access": 0.0,
+      "total": 0
+    },
+    "levels": {
+      "L1": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 0
+      },
+      "L2": {
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 0
+      },
+      "Memory": {
+        "accesses": 0
+      }
+    },
+    "load": 0,
+    "miss_breakdown": {
+      "cause": {
+        "capacity": 0,
+        "cold": 0,
+        "conflict": 0,
+        "policy": 0
+      },
+      "operation": {
+        "load": 0,
+        "store": 0
+      }
+    },
+    "policy": 0,
+    "store": 0,
+    "write_traffic": {
+      "dirty_evictions": 0,
+      "write_through_writes": 0,
+      "writeback_cycles": 0,
+      "writebacks": 0
+    }
+  }
+}

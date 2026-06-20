@@ -1,0 +1,5 @@
+workload,before_median_s,after_median_s,speedup
+polybench_2mm,0.813250,0.248438,3.273
+polybench_gemm,0.031960,0.016787,1.904
+test_local,0.015911,0.008647,1.840
+test_matmul,1.442926,0.547831,2.634
