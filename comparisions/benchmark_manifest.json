@@ -1,0 +1,34 @@
+{
+  "cachegrind": {
+    "d1": "32768,4,32",
+    "ll": "2097152,4,32"
+  },
+  "benchmarks": [
+    {"name": "polybench_2mm", "source": "tasks/polybench_2mm.c", "kernels": ["kernel_2mm"], "tier": "trend", "operation": "mixed"},
+    {"name": "polybench_atax", "source": "tasks/polybench_atax.c", "kernels": ["atax_kernel"], "tier": "trend", "operation": "mixed"},
+    {"name": "polybench_correlation", "source": "tasks/polybench_correlation.c", "kernels": ["correlation_kernel"], "tier": "trend", "operation": "mixed"},
+    {"name": "polybench_gemm", "source": "tasks/polybench_gemm.c", "kernels": ["gemm_kernel"], "tier": "trend", "operation": "mixed"},
+    {"name": "polybench_jacobi", "source": "tasks/polybench_jacobi.c", "kernels": ["jacobi_2d_kernel"], "tier": "trend", "operation": "mixed"},
+    {"name": "test_1d", "source": "tasks/test_1d.c", "kernels": ["loop_1d_kernel", "loop_1d"], "tier": "exact", "operation": "store"},
+    {"name": "test_2d", "source": "tasks/test_2d.c", "kernels": ["loop_2d_kernel", "loop_2d"], "tier": "exact", "operation": "mixed"},
+    {"name": "test_2steps", "source": "tasks/test_2steps.c", "kernels": ["loop_1d_kernel", "loop_1d"], "tier": "exact", "operation": "store"},
+    {"name": "test_call", "source": "tasks/test_call.c", "kernels": ["call_kernel", "touch"], "tier": "exact", "operation": "mixed"},
+    {"name": "test_constant_access", "source": "tasks/test_constant_access.c", "kernels": ["random_access_with_constant_index"], "tier": "exact", "operation": "store"},
+    {"name": "test_constant_access2", "source": "tasks/test_constant_access2.c", "kernels": ["random_access_with_constant_index"], "tier": "exact", "operation": "store"},
+    {"name": "test_constant_variable", "source": "tasks/test_constant_variable.c", "kernels": ["test_constatnt_variable"], "tier": "exact", "operation": "store"},
+    {"name": "test_global", "source": "tasks/test_global.c", "kernels": ["loop_global"], "tier": "exact", "operation": "mixed"},
+    {"name": "test_local", "source": "tasks/test_local.c", "kernels": ["loop_local"], "tier": "exact", "operation": "mixed"},
+    {"name": "test_matmul", "source": "tasks/test_matmul.c", "kernels": ["matmul"], "tier": "trend", "operation": "mixed"},
+    {"name": "test_matmul_cache_friendly", "source": "tasks/test_matmul_cache_friendly.c", "kernels": ["matmul_cache_friendly"], "tier": "trend", "operation": "mixed"},
+    {"name": "test_matmul_params", "source": "tasks/test_matmul_params.c", "kernels": ["matmul_params_kernel", "matmul_params"], "tier": "trend", "operation": "mixed"},
+    {"name": "test_mixed_global_param", "source": "tasks/test_mixed_global_param.c", "kernels": ["mixed_global_param_kernel", "mixed_global_param"], "tier": "trend", "operation": "mixed"},
+    {"name": "test_multi", "source": "tasks/test_multi.c", "kernels": ["func_1d_kernel", "func_1d", "func_2d_kernel", "func_2d"], "tier": "trend", "operation": "mixed"},
+    {"name": "test_multi_array", "source": "tasks/test_multi_array.c", "kernels": ["saxpy_kernel", "saxpy"], "tier": "trend", "operation": "mixed", "casa_supported": false, "expected_failure": "scalar call argument is parsed as an index expression"},
+    {"name": "test_ptr_const_param", "source": "tasks/test_ptr_const_param.c", "kernels": ["test_ptr_const_param", "test_ptr_const_param_kernel"], "tier": "trend", "operation": "store", "casa_supported": false, "expected_failure": "frontend omits the parameter-bound loop frame"},
+    {"name": "test_ptr_param", "source": "tasks/test_ptr_param.c", "kernels": ["test_ptr_param", "test_ptr_param_kernel"], "tier": "trend", "operation": "store"},
+    {"name": "test_regular_block", "source": "tasks/test_regular_block.c", "kernels": ["test"], "tier": "exact", "operation": "mixed"},
+    {"name": "test_stencil", "source": "tasks/test_stencil.c", "kernels": ["stencil_1d_kernel", "stencil_1d"], "tier": "trend", "operation": "mixed"},
+    {"name": "test_struct", "source": "tasks/test_struct.c", "kernels": ["struct_field_access_kernel", "struct_field_access"], "tier": "trend", "operation": "store"},
+    {"name": "test_unnamed_param", "source": "tasks/test_unnamed_param.c", "kernels": ["unnamed_param"], "tier": "exact", "operation": "none"}
+  ]
+}

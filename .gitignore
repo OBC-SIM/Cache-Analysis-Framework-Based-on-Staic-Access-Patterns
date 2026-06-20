@@ -6,3 +6,15 @@ compile_commands.json
 *.idx
 __pycache__/
 *.pyc
+comparisions/cachegrind-results/bin/
+comparisions/cachegrind-results/raw/
+comparisions/cachegrind-results/annotated/
+comparisions/cachegrind-results/logs/
+comparisions/cachegrind-results/*.csv
+comparisions/casa-results/
+comparisions/comparison-results/
+comparisions/tasks/
+comparisions/comparison-results/figures/
+comparisions/comparison-results/runtime.csv
+comparisions/tasks/*_g.ll
+comparisions/tasks/*_g_ape.json
