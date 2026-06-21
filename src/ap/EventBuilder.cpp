@@ -38,6 +38,29 @@ int64_t eval_bound_index(
 
 }  // namespace
 
+const ObjectLayout & EventBuilder::layout_of(
+  const ArrayNode & a, const ApProgram & program,
+  const std::unordered_map<std::string, std::string> & obj_subst)
+{
+  static const ObjectLayout kEmpty;
+
+  if (obj_subst.empty())  // 치환 없음 → 노드당 1회 해석 후 캐시(string 해시 제거).
+  {
+    auto cached = node_cache_.find(&a);
+    if (cached != node_cache_.end()) return *cached->second;
+    auto it = program.objects.find(a.object);
+    const ObjectLayout * ptr =
+      it != program.objects.end() ? &it->second : &kEmpty;
+    node_cache_.emplace(&a, ptr);
+    return *ptr;
+  }
+
+  auto sit = obj_subst.find(a.object);  // 치환 문맥 → 호출처마다 달라 캐시 안 함.
+  const std::string & object = sit != obj_subst.end() ? sit->second : a.object;
+  auto it = program.objects.find(object);
+  return it != program.objects.end() ? it->second : kEmpty;
+}
+
 std::vector<AccessEvent> EventBuilder::build_program(const ApProgram & program)
 {
   std::vector<AccessEvent> out;
@@ -50,6 +73,7 @@ std::vector<AccessEvent> EventBuilder::build_program(const ApProgram & program)
 void EventBuilder::visit_program(const ApProgram & program,
                                  const EventSink & sink)
 {
+  node_cache_.clear();  // 이전 program의 노드 포인터가 남지 않게 한다.
   std::vector<LoopFrame> loop_stack;
   uint64_t seq = 0;
   const std::unordered_map<std::string, int64_t> no_bindings;
@@ -91,10 +115,7 @@ void EventBuilder::visit_v2(
     case ApNodeKind::Array: {
       const auto & a = static_cast<const ArrayNode &>(node);
       const std::string object = resolve_object(a.object);
-      auto it = program.objects.find(object);
-      const ObjectLayout empty;
-      const ObjectLayout & obj =
-        it != program.objects.end() ? it->second : empty;
+      const ObjectLayout & obj = layout_of(a, program, obj_subst);
 
       int64_t byte_offset = 0;
       const bool index_only = std::all_of(

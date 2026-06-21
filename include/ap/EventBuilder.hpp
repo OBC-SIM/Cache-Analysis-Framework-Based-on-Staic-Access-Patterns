@@ -52,6 +52,21 @@ private:
                 const std::string & region_path, uint64_t & seq,
                 const std::unordered_map<std::string, int64_t> & bindings,
                 const std::unordered_map<std::string, std::string> & obj_subst);
+
+  /**
+   * @brief Array 노드의 ObjectLayout을 돌려준다.
+   *
+   * 치환 없는 최상위 문맥(obj_subst 비어 있음)에서는 노드 포인터로 1회만
+   * 해석·캐시해, 반복 접근에서 object id 문자열을 해시하지 않는다. 치환 문맥에서는
+   * 노드가 호출처마다 다른 객체로 해석될 수 있어 캐시하지 않는다.
+   *
+   * 미등록 id는 빈 ObjectLayout을 가리킨다. 반환 참조는 program 수명 동안 유효하다.
+   */
+  const ObjectLayout & layout_of(
+    const ArrayNode & a, const ApProgram & program,
+    const std::unordered_map<std::string, std::string> & obj_subst);
+
+  std::unordered_map<const ArrayNode *, const ObjectLayout *> node_cache_;
 };
 
 }  // namespace apex

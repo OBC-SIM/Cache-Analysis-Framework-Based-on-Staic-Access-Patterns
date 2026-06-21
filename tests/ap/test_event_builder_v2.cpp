@@ -105,6 +105,22 @@ const char* kCallLiteral = R"({
   ]
 })";
 
+// 한 프로그램에서 elem_size가 다른 두 배열(A=4, B=8)을 번갈아 접근.
+// 객체 해석/레이아웃 캐시가 객체별로 올바른 stride를 써야 한다.
+const char* kTwoArrays = R"({
+  "schema_version":2,
+  "metadata":{"objects":{
+    "global::A":{"kind":"array","shape":[10],"elem_type":"i32","elem_size":4},
+    "global::B":{"kind":"array","shape":[10],"elem_type":"double","elem_size":8}
+  },"structs":{}},
+  "functions":[{"function":"f","params":[],"annotations":["yard.analyze"],"body":[
+    {"type":"Loop","var":"i","start":0,"bound":10,"depth":1,"body":[
+      {"type":"Array","object":"global::A","access_path":[{"kind":"index","value":"i"}],"op":"load"},
+      {"type":"Array","object":"global::B","access_path":[{"kind":"index","value":"i"}],"op":"store"}
+    ]}
+  ]}]
+})";
+
 std::vector<AccessEvent> events(const char* json)
 {
   ApProgram p = ApLoader{}.load_program_string(json);
@@ -211,4 +227,16 @@ TEST(EventBuilderV2, call_expansion_leaves_no_param_object)
   // 전개된 모든 이벤트는 실 객체로 귀속되어야 한다(param 객체 잔존 금지).
   for (const auto & e : events(kCall))
     EXPECT_EQ(e.object_name.rfind("function:touch::param:", 0), std::string::npos);
+}
+
+TEST(EventBuilderV2, distinct_objects_use_their_own_layout)
+{
+  // A(elem 4)와 B(elem 8)를 번갈아 접근 → 각 객체의 stride로 offset을 계산해야 한다.
+  // i=3: A load = 이벤트 6 → 3*4=12, B store = 이벤트 7 → 3*8=24.
+  auto ev = events(kTwoArrays);
+  ASSERT_EQ(ev.size(), 20u);  // 10 iter * 2 access
+  EXPECT_EQ(ev[6].object_name, "global::A");
+  EXPECT_EQ(ev[6].byte_offset, 12);
+  EXPECT_EQ(ev[7].object_name, "global::B");
+  EXPECT_EQ(ev[7].byte_offset, 24);
 }
