@@ -5,6 +5,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# 최적화는 build type으로 분리한다 (Cargo의 dev/release 프로파일처럼).
+#   (미지정)·Debug → -O0  : 개발·디버깅·정확성 테스트
+#   Release        → -O2  : 성능 측정·실사용
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+
 # ── 의존성 ────────────────────────────────────────────────────
 find_package(yaml-cpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
