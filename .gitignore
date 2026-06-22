@@ -1,5 +1,6 @@
 system-prompt-extraction/
 build/
+build-release/
 results/
 compile_commands.json
 .cache/
