@@ -60,17 +60,33 @@ sudo apt-get install -y \
 
 ### 빌드 및 테스트
 
+빌드는 용도에 따라 두 가지로 나뉜다. 개발·디버깅·테스트에는 기본 빌드(`-O0`,
+assert 활성)를, 성능 측정이나 실사용에는 Release 빌드(`-O2`)를 쓴다. 빌드 타입은
+빌드 디렉터리마다 고정되므로 두 빌드를 별도 디렉터리에 둔다 (Cargo의 dev/release처럼).
+
+먼저 서브모듈을 초기화한다 (최초 1회).
+
 ```bash
-# 서브모듈 초기화
 git submodule update --init --recursive
+```
 
-# 빌드
+개발 빌드 — `build/casa` 생성, `-O0`, assert 활성:
+
+```bash
 cmake -S . -B build
-cmake --build build
-
-# 테스트
+cmake --build build -j
 ctest --test-dir build
 ```
+
+Release 빌드 — `build-release/casa` 생성, `-O2 -DNDEBUG`:
+
+```bash
+cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release -j
+```
+
+`-O3`가 필요하면 Release 설정에 `-DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG"`를
+덧붙인다.
 
 ---
 
