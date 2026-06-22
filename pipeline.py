@@ -1,10 +1,10 @@
-"""Run the full APEX-Cache source-to-report pipeline.
+"""Run the full CASA source-to-report pipeline.
 
 Usage:
     python3 pipeline.py [options] FILE [FILE ...]
 
 The wrapper accepts C or LLVM IR input, emits APE JSON with the frontend
-LLVM pass, then runs `apex-cache run` to generate cache reports.
+LLVM pass, then runs `casa run` to generate cache reports.
 """
 
 import argparse
@@ -17,7 +17,7 @@ _PLUGIN_CANDIDATES = (
     _ROOT / "frontend" / "build" / "libLoopAnnotatedTrace.so",
     _ROOT / "build" / "libLoopAnnotatedTrace.so",
 )
-_DEFAULT_APEX_CACHE = _ROOT / "build" / "apex-cache"
+_DEFAULT_CASA = _ROOT / "build" / "casa"
 _DEFAULT_CACHE = _ROOT / "settings" / "cache.yaml"
 _DEFAULT_OUTPUT = _ROOT / "results"
 _DEFAULT_INCLUDE = _ROOT / "frontend" / "tasks"
@@ -93,10 +93,10 @@ def run_ape(ll_path: Path, plugin_path: Path) -> Path:
     raise FileNotFoundError(f"APE JSON was not generated for {abs_ll}")
 
 
-def run_apex_cache(json_path: Path, apex_bin: Path, cache_yaml: Path,
+def run_casa(json_path: Path, casa_bin: Path, cache_yaml: Path,
                    output_dir: Path, verbose: bool, no_color: bool) -> None:
     cmd = [
-        str(apex_bin.resolve()),
+        str(casa_bin.resolve()),
         "run",
         str(json_path.resolve()),
         "--cache",
@@ -118,14 +118,14 @@ def _check_file(path: Path, label: str) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="C/LLVM IR -> APE JSON -> APEX-Cache reports"
+        description="C/LLVM IR -> APE JSON -> CASA reports"
     )
     parser.add_argument("files", nargs="+", metavar="FILE",
                         help=".c or .ll input file")
     parser.add_argument("--plugin", default=str(_default_plugin()),
                         metavar="PATH", help="LLVM pass plugin path")
-    parser.add_argument("--apex-cache", default=str(_DEFAULT_APEX_CACHE),
-                        metavar="PATH", help="apex-cache binary path")
+    parser.add_argument("--casa", default=str(_DEFAULT_CASA),
+                        metavar="PATH", help="casa binary path")
     parser.add_argument("--cache", default=str(_DEFAULT_CACHE),
                         metavar="PATH", help="cache.yaml path")
     parser.add_argument("--output", default=str(_DEFAULT_OUTPUT),
@@ -135,16 +135,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ape-only", action="store_true",
                         help="stop after generating APE JSON")
     parser.add_argument("--verbose", action="store_true",
-                        help="forward --verbose to apex-cache run")
+                        help="forward --verbose to casa run")
     parser.add_argument("--no-color", action="store_true",
-                        help="forward --no-color to apex-cache run")
+                        help="forward --no-color to casa run")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     plugin = Path(args.plugin)
-    apex_bin = Path(args.apex_cache)
+    casa_bin = Path(args.casa)
     cache_yaml = Path(args.cache)
     output_dir = Path(args.output)
     include_dir = Path(args.include)
@@ -153,7 +153,7 @@ def main() -> int:
         _check_file(plugin, "plugin")
         _check_file(include_dir, "include directory")
         if not args.ape_only:
-            _check_file(apex_bin, "apex-cache binary")
+            _check_file(casa_bin, "casa binary")
             _check_file(cache_yaml, "cache config")
     except FileNotFoundError as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -174,8 +174,8 @@ def main() -> int:
             json_path = run_ape(ll_path, plugin)
             print(f"done -> {json_path}", flush=True)
             if not args.ape_only:
-                print(f"  [3/{total_steps}] apex-cache...", flush=True)
-                run_apex_cache(json_path, apex_bin, cache_yaml, output_dir,
+                print(f"  [3/{total_steps}] casa...", flush=True)
+                run_casa(json_path, casa_bin, cache_yaml, output_dir,
                                args.verbose, args.no_color)
                 print(f"Reports -> {output_dir.resolve()}")
         except subprocess.CalledProcessError as exc:

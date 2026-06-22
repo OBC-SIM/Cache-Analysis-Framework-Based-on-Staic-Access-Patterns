@@ -127,7 +127,7 @@ def main() -> None:
                         default=Path(__file__).with_name("benchmark_manifest.json"))
     parser.add_argument("--workload", action="append", default=[])
     parser.add_argument("--repetitions", type=int, default=1)
-    parser.add_argument("--casa-bin", type=Path, default=Path("build/apex-cache"),
+    parser.add_argument("--casa-bin", type=Path, default=Path("build/casa"),
                         help="CASA executable used for simulation timing")
     args = parser.parse_args()
     repo, base = Path(__file__).resolve().parent.parent, args.manifest.resolve().parent

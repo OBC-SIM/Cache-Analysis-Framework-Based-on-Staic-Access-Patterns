@@ -1,4 +1,4 @@
-"""APEX-Cache 리포트 시각화 CLI.
+"""CASA 리포트 시각화 CLI.
 
 `run --output <dir>`이 만든 리포트를 읽어 PNG 4종을 생성한다:
   miss_breakdown.png  — cold/capacity/conflict miss 수
@@ -26,7 +26,7 @@ from backend.plotting import figures, style  # noqa: E402
 def generate(input_path, output_dir=None, top_n: int = 10) -> list:
     """리포트를 읽어 PNG 4종을 생성하고 저장 경로 목록을 반환한다."""
     os.environ.setdefault("MPLBACKEND", "Agg")
-    os.environ.setdefault("MPLCONFIGDIR", "/tmp/apex-cache-matplotlib")
+    os.environ.setdefault("MPLCONFIGDIR", "/tmp/casa-matplotlib")
     Path(os.environ["MPLCONFIGDIR"]).mkdir(parents=True, exist_ok=True)
     import matplotlib.pyplot as plt
 
@@ -57,7 +57,7 @@ def generate(input_path, output_dir=None, top_n: int = 10) -> list:
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description="APEX-Cache 리포트 시각화")
+    p = argparse.ArgumentParser(description="CASA 리포트 시각화")
     p.add_argument("input",
                    help="summary JSON 파일 또는 run --output 리포트 디렉터리")
     p.add_argument("--output", default=None,
