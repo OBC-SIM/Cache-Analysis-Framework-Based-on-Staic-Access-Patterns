@@ -172,6 +172,16 @@ TEST(EventBuilderV2, two_d_row_major_byte_offset)
   EXPECT_EQ(events(kArr2d)[10].byte_offset, 40);
 }
 
+TEST(EventBuilderV2, two_d_offsets_span_full_index_space)
+{
+  // 외부 i(슬롯 0)·내부 j(슬롯 1)가 반복 전 구간에서 올바로 해석돼야 한다.
+  auto ev = events(kArr2d);
+  ASSERT_EQ(ev.size(), 64u);
+  EXPECT_EQ(ev[0].byte_offset, 0);     // (0,0)
+  EXPECT_EQ(ev[10].byte_offset, 40);   // (1,2)
+  EXPECT_EQ(ev[63].byte_offset, 252);  // (7,7) → 63*4
+}
+
 TEST(EventBuilderV2, struct_access_byte_offset)
 {
   // o.items[2].y → 8 + 2*16 + 8 = 48

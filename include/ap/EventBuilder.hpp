@@ -66,7 +66,19 @@ private:
     const ArrayNode & a, const ApProgram & program,
     const std::unordered_map<std::string, std::string> & obj_subst);
 
+  /**
+   * @brief access_path의 index 식을 현재 loop/binding 문맥에서 정수로 평가한다.
+   *
+   * 단일 식별자(루프 변수)는 직전 loop_stack 슬롯 위치를 step별로 기억했다가
+   * 이름이 일치하면 비교 1회로 재사용한다(활성 nest 내 induction 변수명이
+   * 유일하다는 전제 — 생성 AP에서 성립). 복합 식은 기존대로 평가한다.
+   */
+  int64_t eval_bound_index(
+    const RawIndexStep & step, const std::vector<LoopFrame> & loop_stack,
+    const std::unordered_map<std::string, int64_t> & bindings);
+
   std::unordered_map<const ArrayNode *, const ObjectLayout *> node_cache_;
+  std::unordered_map<const RawIndexStep *, int> slot_hint_;
 };
 
 }  // namespace apex

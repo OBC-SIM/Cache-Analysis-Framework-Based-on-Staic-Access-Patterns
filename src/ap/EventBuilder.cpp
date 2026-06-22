@@ -11,21 +11,36 @@
 
 namespace apex
 {
-namespace
-{
-
-int64_t eval_bound_index(
-  const std::string & expr, const std::vector<LoopFrame> & loop_stack,
+int64_t EventBuilder::eval_bound_index(
+  const RawIndexStep & step, const std::vector<LoopFrame> & loop_stack,
   const std::unordered_map<std::string, int64_t> & bindings)
 {
+  const std::string & expr = step.expr;
+
   bool identifier = !expr.empty();
   for (char c : expr)
     if (!std::isalnum(static_cast<unsigned char>(c)) && c != '_')
+    {
       identifier = false;
+      break;
+    }
   if (identifier)
   {
-    for (auto it = loop_stack.rbegin(); it != loop_stack.rend(); ++it)
-      if (it->var == expr) return it->iter;
+    // 슬롯 힌트: 직전에 expr이 있던 loop_stack 위치를 이름 1회 비교로 재검증해
+    // 재사용한다. 빗나가면(문맥 변화) 아래 역스캔이 다시 채운다.
+    auto hint = slot_hint_.find(&step);
+    if (hint != slot_hint_.end())
+    {
+      const std::size_t s = static_cast<std::size_t>(hint->second);
+      if (s < loop_stack.size() && loop_stack[s].var == expr)
+        return loop_stack[s].iter;
+    }
+    for (std::size_t s = loop_stack.size(); s-- > 0;)
+      if (loop_stack[s].var == expr)
+      {
+        slot_hint_[&step] = static_cast<int>(s);
+        return loop_stack[s].iter;
+      }
     auto bound = bindings.find(expr);
     if (bound != bindings.end()) return bound->second;
   }
@@ -35,8 +50,6 @@ int64_t eval_bound_index(
   for (const auto & binding : bindings) vars[binding.first] = binding.second;
   return eval_index(expr, vars);
 }
-
-}  // namespace
 
 const ObjectLayout & EventBuilder::layout_of(
   const ArrayNode & a, const ApProgram & program,
@@ -74,6 +87,7 @@ void EventBuilder::visit_program(const ApProgram & program,
                                  const EventSink & sink)
 {
   node_cache_.clear();  // 이전 program의 노드 포인터가 남지 않게 한다.
+  slot_hint_.clear();
   std::vector<LoopFrame> loop_stack;
   uint64_t seq = 0;
   const std::unordered_map<std::string, int64_t> no_bindings;
@@ -130,8 +144,7 @@ void EventBuilder::visit_v2(
         for (std::size_t p = a.access_path.size(); p-- > 0;)
         {
           const auto & raw = std::get<RawIndexStep>(a.access_path[p]);
-          byte_offset += eval_bound_index(raw.expr, loop_stack, bindings) *
-                         stride;
+          byte_offset += eval_bound_index(raw, loop_stack, bindings) * stride;
           --shape_index;
           if (shape_index >= 0)
             stride *= obj.shape[static_cast<std::size_t>(shape_index)];
@@ -144,7 +157,7 @@ void EventBuilder::visit_v2(
         for (const auto & raw : a.access_path)
           if (std::holds_alternative<RawIndexStep>(raw))
             path.push_back(IndexStep{eval_bound_index(
-              std::get<RawIndexStep>(raw).expr, loop_stack, bindings)});
+              std::get<RawIndexStep>(raw), loop_stack, bindings)});
           else
             path.push_back(std::get<FieldStep>(raw));
         byte_offset = resolve_offset(obj, path, program.structs);
