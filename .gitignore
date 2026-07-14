@@ -13,6 +13,7 @@ comparisions/cachegrind-results/annotated/
 comparisions/cachegrind-results/logs/
 comparisions/cachegrind-results/*.csv
 comparisions/casa-results/
+comparisions/scale-results/
 comparisions/comparison-results/
 comparisions/tasks/
 comparisions/comparison-results/figures/
