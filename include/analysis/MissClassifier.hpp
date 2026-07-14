@@ -1,9 +1,9 @@
 #pragma once
 #include <cstdint>
-#include <list>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 namespace apex
 {
@@ -48,14 +48,25 @@ public:
                                    bool fill_l1 = true);
 
 private:
+  struct FaNode
+  {
+    uint64_t cache_line = 0;
+    int prev = -1;
+    int next = -1;
+  };
+
   int fa_capacity_;
+  int fa_lru_head_ = -1;
+  int fa_mru_tail_ = -1;
 
   std::unordered_set<uint64_t> ever_seen_;
-  std::list<uint64_t> fa_lru_;
-  std::unordered_map<uint64_t, std::list<uint64_t>::iterator> fa_map_;
+  std::vector<FaNode> fa_nodes_;
+  std::unordered_map<uint64_t, int> fa_map_;
 
   // FA 쉐도우 캐시 접근: 히트 여부 반환 후 LRU 갱신 및 용량 초과 시 퇴출.
   bool fa_access(uint64_t cache_line);
+  void detach_fa_node(int index);
+  void append_fa_mru(int index);
 };
 
 }  // namespace apex
